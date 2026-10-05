@@ -1,0 +1,39 @@
+@import '../../packages/core/src/styles.css';
+
+:root {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --bg-app: #09090b;
+  --border-app: #27272a;
+  --flickerless-stream-color: #3b82f6; /* Accent blue for showcase */
+  --flickerless-stream-bg: rgba(59, 130, 246, 0.15);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-app);
+  color: #f4f4f5;
+  min-height: 100vh;
+  padding: 2rem 1.5rem;
+}
+
+.mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Skeleton animation for the "Old vs New" comparison */
+@keyframes legacy-skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.legacy-pill {
+  height: 1.25rem;
+  background-color: #27272a;
+  border-radius: 9999px;
+  animation: legacy-skeleton-pulse 1.4s ease-in-out infinite;
+}

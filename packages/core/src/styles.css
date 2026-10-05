@@ -1,0 +1,115 @@
+:root {
+  --flickerless-stream-color: #18181b;
+  --flickerless-stream-bg: rgba(228, 228, 231, 0.45);
+  --flickerless-stream-height: 2px;
+  --flickerless-stream-duration: 1.35s;
+  --flickerless-attenuation-opacity: 0.52;
+  --flickerless-transition: opacity 180ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --flickerless-stream-color: #f4f4f5;
+    --flickerless-stream-bg: rgba(63, 63, 70, 0.35);
+  }
+}
+
+.dark {
+  --flickerless-stream-color: #f4f4f5;
+  --flickerless-stream-bg: rgba(63, 63, 70, 0.35);
+}
+
+/* Base surface container */
+.flickerless-surface {
+  position: relative;
+  width: 100%;
+  display: block;
+}
+
+/* 2px Glide Stream Bar */
+.flickerless-stream {
+  position: relative;
+  width: 100%;
+  height: var(--flickerless-stream-height);
+  overflow: hidden;
+  background-color: transparent;
+  opacity: 0;
+  transition: opacity 160ms ease;
+  z-index: 10;
+}
+
+.flickerless-surface[data-loading="true"] .flickerless-stream {
+  opacity: 1;
+  background-color: var(--flickerless-stream-bg);
+}
+
+.flickerless-surface[data-loading="true"] .flickerless-stream::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 32%;
+  background: var(--flickerless-stream-color);
+  border-radius: 9999px;
+  will-change: transform;
+  animation: flickerless-stream-glide var(--flickerless-stream-duration) cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes flickerless-stream-glide {
+  0% {
+    transform: translate3d(-100%, 0, 0);
+  }
+  100% {
+    transform: translate3d(360%, 0, 0);
+  }
+}
+
+/* Surface body (tables, card feeds, grids) */
+.flickerless-body {
+  width: 100%;
+  transition: var(--flickerless-transition);
+}
+
+/* Attenuation when refetching */
+.flickerless-surface[data-loading="true"] .flickerless-body {
+  opacity: var(--flickerless-attenuation-opacity);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Cold / Initial loading state */
+.flickerless-initial-load {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3.5rem 1.5rem;
+  text-align: center;
+  color: #71717a;
+  gap: 0.75rem;
+}
+
+/* Empty state container */
+.flickerless-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3.5rem 1.5rem;
+  text-align: center;
+  color: #71717a;
+  gap: 0.5rem;
+}
+
+/* Error state container */
+.flickerless-error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: #ef4444;
+  gap: 0.75rem;
+}

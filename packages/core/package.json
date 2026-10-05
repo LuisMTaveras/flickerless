@@ -1,0 +1,22 @@
+{
+  "name": "@flickerless/core",
+  "version": "0.1.0",
+  "description": "Core framework-agnostic engine, Web Component, and CSS for Flickerless data surfaces.",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "style": "dist/styles.css",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js"
+    },
+    "./styles.css": "./dist/styles.css"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "license": "MIT"
+}

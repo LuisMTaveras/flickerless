@@ -1,0 +1,29 @@
+{
+  "name": "flickerless",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Zero-flicker, layout-stable, calm data loading surfaces for tables, lists, and dashboards. The modern alternative to skeleton fatigue.",
+  "workspaces": [
+    "packages/*",
+    "playground"
+  ],
+  "scripts": {
+    "dev": "npm --workspace=playground run dev",
+    "build": "npm --workspaces --if-present run build",
+    "typecheck": "npm --workspaces --if-present run typecheck"
+  },
+  "keywords": [
+    "skeleton-alternative",
+    "data-table",
+    "loading-state",
+    "zero-cls",
+    "keep-previous-data",
+    "flickerless",
+    "ui",
+    "web-components",
+    "react",
+    "vue"
+  ],
+  "author": "Luis M. Taveras <https://github.com/LuisMTaveras>",
+  "license": "MIT"
+}

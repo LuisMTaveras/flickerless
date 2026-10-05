@@ -1,0 +1,19 @@
+{
+  "name": "@flickerless/vue",
+  "version": "0.1.0",
+  "description": "Official Vue 3 composables and component for Flickerless data surfaces.",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "peerDependencies": {
+    "vue": "^3.3.0"
+  },
+  "dependencies": {
+    "@flickerless/core": "^0.1.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "license": "MIT"
+}
