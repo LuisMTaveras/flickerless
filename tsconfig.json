@@ -9,6 +9,10 @@
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "@flickerless/core": ["packages/core/dist/index.d.ts"]
+    }
   }
 }

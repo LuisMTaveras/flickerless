@@ -1,39 +1,167 @@
+@import "tailwindcss";
 @import '../../packages/core/src/styles.css';
 
 :root {
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  --bg-app: #09090b;
-  --border-app: #27272a;
-  --flickerless-stream-color: #3b82f6; /* Accent blue for showcase */
+  --bg-app: #f3f2ed; /* Fondo cálido idéntico a la imagen de referencia */
+  --card-bg: #ffffff;
+  --card-border: rgba(0, 0, 0, 0.07);
+  --card-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.07), 0 0 1px rgba(0, 0, 0, 0.08);
+  --text-primary: #18181b;
+  --text-muted: #71717a;
+  --skeleton-base: #e4e4e7;
+  --skeleton-subtext: #f4f4f5;
+  --shimmer-highlight: rgba(255, 255, 255, 0.82);
+  --flickerless-stream-color: #3b82f6;
   --flickerless-stream-bg: rgba(59, 130, 246, 0.15);
+  --flickerless-stream-height: 2px;
+  --shimmer-duration: 2s;
+}
+
+html.dark {
+  --bg-app: #090a0f;
+  --card-bg: #12141c;
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-shadow: 0 25px 50px -20px rgba(0, 0, 0, 0.7);
+  --text-primary: #f4f4f5;
+  --text-muted: #a1a1aa;
+  --skeleton-base: #27272a;
+  --skeleton-subtext: #1f1f23;
+  --shimmer-highlight: rgba(255, 255, 255, 0.12);
+  --flickerless-stream-color: #60a5fa;
+  --flickerless-stream-bg: rgba(59, 130, 246, 0.2);
 }
 
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 body {
   background-color: var(--bg-app);
-  color: #f4f4f5;
+  color: var(--text-primary);
   min-height: 100vh;
-  padding: 2rem 1.5rem;
+  position: relative;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  overflow-x: hidden;
+}
+
+/* Reference Card Styling (Fiel a la imagen) */
+.ref-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
+  border-radius: 1.5rem; /* rounded-3xl / 24px */
+}
+
+/* ==========================================================================
+   ✨ HAZ DE LUZ DIAGONAL CONTINUO A 110° (SHIMMER WAVE FIEL A LA IMAGEN)
+   ========================================================================== */
+
+@keyframes shimmer-beam-sweep {
+  0% {
+    transform: translate3d(-150%, 0, 0) rotate(18deg);
+  }
+  100% {
+    transform: translate3d(240%, 0, 0) rotate(18deg);
+  }
+}
+
+.shimmer-sweep-surface {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-sweep-surface::after {
+  content: "";
+  position: absolute;
+  top: -60%;
+  left: -60%;
+  width: 220%;
+  height: 220%;
+  background: linear-gradient(
+    110deg,
+    transparent 28%,
+    var(--shimmer-highlight) 50%,
+    transparent 72%
+  );
+  animation: shimmer-beam-sweep var(--shimmer-duration, 2s) cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+  z-index: 25;
+}
+
+/* 2px Glowing Linear Progress Stream Bar */
+@keyframes linear-stream-run {
+  0% {
+    transform: translate3d(-100%, 0, 0);
+  }
+  100% {
+    transform: translate3d(320%, 0, 0);
+  }
+}
+
+.linear-stream-track {
+  position: relative;
+  width: 100%;
+  height: var(--flickerless-stream-height, 2px);
+  overflow: hidden;
+  background-color: var(--flickerless-stream-bg);
+}
+
+.linear-stream-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 35%;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa, #818cf8);
+  border-radius: 9999px;
+  animation: linear-stream-run 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.85);
+}
+
+/* Siluetas de la Tabla */
+.sk-avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background-color: var(--skeleton-base);
+  flex-shrink: 0;
+}
+
+.sk-badge {
+  height: 1.5rem;
+  width: 5rem;
+  border-radius: 9999px;
+  background-color: var(--skeleton-base);
+}
+
+/* Siluetas de Gráficos y Dashboards */
+.sk-chart-bar {
+  border-radius: 6px 6px 0 0;
+  background-color: var(--skeleton-base);
+  width: 100%;
+  max-width: 34px;
+  margin: 0 auto;
+}
+
+.sk-grid-line {
+  border-bottom: 1px dashed rgba(161, 161, 170, 0.25);
+  width: 100%;
 }
 
 .mono {
   font-family: 'JetBrains Mono', monospace;
 }
 
-/* Skeleton animation for the "Old vs New" comparison */
-@keyframes legacy-skeleton-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
+/* Scrollbars sutiles */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
-
-.legacy-pill {
-  height: 1.25rem;
-  background-color: #27272a;
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--skeleton-base);
   border-radius: 9999px;
-  animation: legacy-skeleton-pulse 1.4s ease-in-out infinite;
 }

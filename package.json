@@ -25,5 +25,11 @@
     "vue"
   ],
   "author": "Luis M. Taveras <https://github.com/LuisMTaveras>",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "tailwindcss": "^4.3.3"
+  }
 }
