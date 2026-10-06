@@ -90,12 +90,14 @@
 
 /* Superficie con haz de luz unificado */
 .shimmer-surface,
+.shimmer-sweep-surface,
 .flickerless-shimmer {
   position: relative;
   overflow: hidden;
 }
 
 .shimmer-surface::after,
+.shimmer-sweep-surface::after,
 .flickerless-shimmer::after {
   content: "";
   position: absolute;
@@ -115,6 +117,7 @@
 }
 
 .dark .shimmer-surface::after,
+.dark .shimmer-sweep-surface::after,
 .dark .flickerless-shimmer::after {
   background: linear-gradient(
     110deg,
@@ -227,3 +230,73 @@
   border-bottom: 1px dashed rgba(161, 161, 170, 0.22);
   width: 100%;
 }
+
+/* ==========================================================================
+   📏 Zero-CLS Height Preservation
+   ========================================================================== */
+.flickerless-preserve-height {
+  transition: min-height 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: min-height;
+}
+
+/* ==========================================================================
+   ✍️ Inline Mutation Saving (Fila o celda guardando datos)
+   ========================================================================== */
+.flickerless-saving {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.65;
+  transition: opacity 0.2s ease;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.flickerless-saving::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--flickerless-saving-beam, rgba(16, 185, 129, 0.18)) 50%,
+    transparent 100%
+  );
+  animation: shimmer-beam-sweep 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ==========================================================================
+   ♿ Accesibilidad Universal (Screen Readers & Reduced Motion)
+   ========================================================================== */
+.sr-only,
+.flickerless-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer-surface::after,
+  .shimmer-sweep-surface::after,
+  .flickerless-shimmer::after,
+  .linear-progress-bar::after,
+  .flickerless-progress-bar::after,
+  .flickerless-stream::after,
+  .flickerless-saving::after {
+    animation: none !important;
+    opacity: 0.5 !important;
+  }
+
+  .flickerless-body,
+  .flickerless-preserve-height {
+    transition: none !important;
+  }
+}
+

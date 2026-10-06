@@ -6,6 +6,7 @@ export const FlickerlessTableSkeleton = defineComponent({
     rows: { type: Number, default: 6 },
     columns: { type: Number, default: 8 },
     showAvatar: { type: Boolean, default: true },
+    as: { type: String, default: 'tbody' },
   },
   setup(props) {
     return () => {
@@ -61,6 +62,10 @@ export const FlickerlessTableSkeleton = defineComponent({
           }
         }
         rowElements.push(h('tr', { class: 'border-b border-zinc-800/50' }, cells));
+      }
+
+      if (props.as === 'fragment' || props.as === 'none') {
+        return rowElements;
       }
 
       return h('tbody', { class: 'shimmer-sweep-surface divide-y divide-zinc-800/50' }, rowElements);
