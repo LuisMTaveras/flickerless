@@ -1,9 +1,9 @@
 {
   "name": "@flickerless/react",
   "version": "0.1.0",
-  "description": "Official React adapter and hooks for Flickerless data surfaces.",
-  "main": "dist/index.cjs.js",
-  "module": "dist/index.esm.js",
+  "description": "React (DOM) surface, value and hook for Flickerless: loading without skeletons.",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "peerDependencies": {
     "react": ">=18.0.0",
@@ -16,5 +16,12 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  }
 }

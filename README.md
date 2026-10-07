@@ -1,298 +1,235 @@
 # ⚡ Flickerless
 
-> **El estándar de carga de datos sin fatiga visual, sin saltos de pantalla (0.00 CLS) y sin escribir maquetas manuales.**  
-> Diseñado para tablas analíticas, gráficos y paneles de control profesionales (CRM, ERP, Finanzas, Dashboards).
+> **Lo que ya estaba se queda; lo que aún no existe es «—».**
+> Carga de datos sin skeletons, sin spinners que tapan la pantalla y sin saltos (0.00 CLS).
+> Para tablas, gráficos y paneles de negocio (CRM, ERP, finanzas) en Vue, React y React Native.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg)](https://www.typescriptlang.org/)
 [![Zero CLS](https://img.shields.io/badge/CLS-0.00-brightgreen.svg)](https://web.dev/cls/)
-[![Bundle Size](https://img.shields.io/badge/Bundle-<2KB-success.svg)](https://bundlephobia.com)
 
 ---
 
-## 🎯 ¿Por qué Flickerless es infinitamente superior a los Skeletons tradicionales?
+## 🎯 Por qué no un skeleton
 
-Los **Skeleton Screens** nacieron en 2014 para feeds de redes sociales. En aplicaciones de negocio reales (tablas densas, analíticas, paneles de control), se convierten en un dolor de cabeza técnico y visual:
+Un skeleton y un spinner grande fallan igual en lo que importa:
+
+- **En cada recarga** (paginar, filtrar, cambiar el período) el usuario pierde lo
+  que estaba mirando y la pantalla salta.
+- **Antes de la primera respuesta** se le enseña una forma —o peor, una cifra—
+  que no es verdad. En una pantalla financiera, «$0.00» mientras carga no es un
+  hueco: es una cifra falsa. «No hay facturas» durante los primeros 180 ms es
+  una alarma falsa.
 
 ```
-❌ SKELETON TRADICIONAL (Fatiga Ocular & Parpadeo Constante)
-[Filtro: Activos] ──> [Borrón gris pulsando 200ms] ──> [Nueva tabla aparece] ──> Brinco de pantalla (CLS)
+❌ SKELETON
+[Filtro] ──> [Cajas grises pulsando] ──> [Tabla nueva] ──> la pantalla salta
 
-✨ FLICKERLESS (Carga Calmada estilo Linear / Stripe)
-[Filtro: Activos] ──> [Filas reales al 50% + barra 2px] ──> [Transición suave] ──> CERO saltos (0.00 CLS)
+✨ FLICKERLESS
+[Filtro] ──> [Filas reales atenuadas + barra de 2 px] ──> [Datos nuevos] ──> nada salta
 ```
 
-### Los 4 Dolores Críticos del Skeleton Tradicional:
-
-| Problema | Con Skeleton Tradicional | Con Flickerless |
+| Problema | Skeleton | Flickerless |
 | :--- | :--- | :--- |
-| **1. Infierno de Mantenimiento** | Tienes que programar 40 líneas de `<div>` grises por cada tabla o pantalla. Si agregas una columna o cambias estilos, tienes que reescribir el skeleton a mano. | **Cero mantenimiento:** En recargas, el propio contenido real actúa como su layout. Para cargas iniciales en frío, usas un componente preconstruido de **1 sola línea**. |
-| **2. Parpadeo y Fatiga Ocular (*Micro-flickering*)** | Si tu API responde en 150–250ms, la pantalla borra los datos existentes y parpadea con rectángulos grises titilando como una bombilla rota. Cansa la vista. | **Umbral Anti-Flicker (180ms):** Si la API responde rápido, la pantalla ni parpadea. Si tarda, mantiene los datos existentes legibles al 50% con un haz de luz GPU a 110°. |
-| **3. Salto de Pantalla (*Cumulative Layout Shift - CLS*)** | El skeleton casi nunca mide lo mismo que las filas o gráficos finales. Al llegar los datos, la paginación o el footer saltan bruscamente (CLS > 0.25). | **0.000 CLS Garantizado:** Retención dinámica de altura con `preserveHeight`. El contenedor no colapsa ni salta de tamaño jamás. |
-| **4. El Engaño del "Falso Resultado"** | Al filtrar por un término sin resultados, el skeleton te muestra 6 filas pulsando durante 300ms haciéndote creer que hay datos en camino, para luego decir "0 registros". | **Visualmente veraz:** No simula datos falsos donde no existen. Muestra la realidad con elegancia. |
+| **Mantenimiento** | Una maqueta gris por pantalla que hay que reescribir al cambiar una columna. | En recargas el contenido real es su propia maqueta. En frío, la estructura real con «—». |
+| **Parpadeo** | Una respuesta de 150 ms borra los datos y pinta cajas grises. | Umbral anti-parpadeo (180 ms): si la respuesta llega antes, no se enseña nada. |
+| **Saltos (CLS)** | El skeleton casi nunca mide lo que mide el contenido final. | Las filas y paneles son los reales; `preserveHeight` congela la altura en recargas. |
+| **Datos falsos** | Seis filas pulsando para luego decir «0 registros»; un cero mientras carga. | «Vacío» solo con una respuesta en la mano; un dato desconocido es «—», nunca un cero. |
 
 ---
 
-## 🧠 El Modelo Mental de Flickerless: Las Dos Fases de los Datos
+## 🧩 Las tres piezas
 
-Cualquier pantalla de datos atraviesa **dos fases distintas**:
+| Pieza | Qué hace |
+| :--- | :--- |
+| **`FlickerlessSurface`** | Envuelve una zona de datos. Si la respuesta tarda menos de `delayMs` (180 ms) no enseña nada; si tarda más, **atenúa lo que ya había** y pinta una barra de 2 px arriba. El estado vacío solo aparece **con una respuesta en la mano**. |
+| **`FlickerlessValue`** | Un dato que puede no existir todavía. Pinta «—» atenuado (y «Sin dato todavía» para el lector de pantalla) si `value` es `null`/`undefined` o si la superficie que lo envuelve aún no respondió. |
+| **`settled`** | Si la superficie ya tuvo una respuesta. Sin la prop se deduce (una carga terminada sin error); se pasa explícita cuando la pantalla ya lo sabe. |
+
+Y una carcasa lista para la carga en frío de una tabla: **`FlickerlessTableShell`**
+(Vue y React), filas reales con «—» en cada celda.
+
+| Paquete | Para |
+| :--- | :--- |
+| [`@flickerless/core`](./packages/core) | Controlador anti-parpadeo sin DOM (umbral y duración mínima), CSS y un Web Component opcional. |
+| [`@flickerless/vue`](./packages/vue) | Vue 3: superficie, valor, carcasa de tabla, `useFlickerlessQuery` y `v-flickerless-saving`. |
+| [`@flickerless/react`](./packages/react) | React DOM: superficie, valor, carcasa de tabla y `useFlickerless`. |
+| [`@flickerless/react-native`](./packages/react-native) | React Native: superficie (barra animada nativa), valor y proveedor de colores. |
+
+---
+
+## 🧠 El modelo mental: dos fases
 
 ```
-                             ┌──────────────────────────────────────┐
-                             │    FASE 1: COLD START (En Frío)      │
-                             │  La página acaba de abrirse.         │
-                             │  clientes.length === 0 && cargando   │
-                             └──────────────────┬───────────────────┘
-                                                │
-                          ¿Cómo carga?          ▼
-                          👉 Usas el slot #skeleton: <FlickerlessTableSkeleton />
-                                                │
-                                                ▼
-                             ┌──────────────────────────────────────┐
-                             │   PANTALLA CON DATOS CARGADOS        │
-                             │  El usuario lee 15 filas de clientes │
-                             └──────────────────┬───────────────────┘
-                                                │
-                               El usuario busca │
-                               o cambia página  ▼
-                             ┌──────────────────────────────────────┐
-                             │    FASE 2: WARM REFETCH (Recarga)    │
-                             │  El usuario interactúa.              │
-                             │  clientes.length > 0 && cargando     │
-                             └──────────────────┬───────────────────┘
-                                                │
-                          ¿Cómo carga?          ▼
-                          👉 CERO CÓDIGO EXTRA: <FlickerlessSurface>
-                             mantiene las filas anteriores legibles al 50%
-                             con la micro-barra de 2px y el haz a 110°.
+FASE 1 · EN FRÍO                     FASE 2 · RECARGA
+La pantalla acaba de abrirse.        El usuario pagina, filtra o refresca.
+No hay nada que conservar.           Hay datos en pantalla.
+        │                                    │
+        ▼                                    ▼
+La CARCASA real: encabezados,        CERO código extra: la superficie deja
+etiquetas, columnas y «—» donde      lo que había, atenuado, con la barra
+va cada dato. Nunca un cero.         de 2 px. Nada desaparece, nada salta.
 ```
+
+### La carga en frío: carcasa, no skeleton
+
+- **Cifras**: `null` hasta la primera respuesta y `FlickerlessValue` las pinta «—». Nunca `|| 0` para «rellenar».
+- **Mensajes de vacío**: solo con una respuesta (`settled`).
+- **Tablas**: `FlickerlessTableShell` dentro del `<tbody>` real, con tantas columnas como `<th>`.
+- **Gráficos**: el marco vacío del tamaño del gráfico, sin texto.
+- **Error**: un aviso con «Reintentar». Un fallo **no** es un panel en cero, y lo que ya se había cargado se queda.
+- **Nada desaparece al recargar**: un bloque con `v-if="!loading"` se borra en cada consulta; se deja siempre y su valor va por `FlickerlessValue`.
+
+### Otra entidad no se conserva
+
+Conservar vale para **recargar lo mismo**. Si cambia el sujeto —otro cliente, otro
+documento—, lo anterior no es suyo: se vacía y se ve la carcasa. Dejar atenuadas las
+facturas del cliente anterior pondría facturas ajenas bajo el nombre del nuevo.
 
 ---
 
 ## 📦 Instalación
 
 ```bash
-npm install @flickerless/vue @flickerless/core
+npm install @flickerless/vue @flickerless/core      # Vue 3
+npm install @flickerless/react @flickerless/core    # React DOM
+npm install @flickerless/react-native @flickerless/core
 ```
 
-En tu `src/main.ts`:
+En la web, importa los estilos una sola vez:
+
 ```ts
-// Importa los estilos GPU globales una sola vez
 import '@flickerless/core/styles.css';
 ```
 
 ---
 
-## 🛠️ Guía de Implementación Paso a Paso
+## 🛠️ Uso
 
----
-
-### CASO 1: Tablas con Slots Limpios (`#skeleton`, `#empty`, `#default`)
-
-Olvídate de condiciones booleanas enredadas (`cargando && items.length === 0`). `<FlickerlessSurface>` orquesta todo:
+### Tablas: la condición es «no hay nada que conservar»
 
 ```vue
 <script setup lang="ts">
-import { FlickerlessSurface, FlickerlessTableSkeleton, vFlickerlessSaving } from '@flickerless/vue';
-
-defineProps<{
-  clientes: any[];
-  cargando: boolean;
-  guardandoId?: string | null;
-}>();
+import { FlickerlessSurface, FlickerlessTableShell } from '@flickerless/vue';
+const props = defineProps<{ rows: Invoice[]; loading: boolean }>();
 </script>
 
 <template>
-  <!-- preserve-height congela la altura para garantizar 0.00 CLS -->
-  <FlickerlessSurface 
-    :loading="cargando" 
-    :empty="clientes.length === 0" 
-    :preserve-height="true"
-    :delay-ms="180"
-  >
-    <!-- ⚡ 1. Carga inicial en frío (se renderiza solo si está cargando y no hay datos) -->
-    <template #skeleton>
-      <table class="w-full text-left text-xs">
-        <thead>...</thead>
-        <FlickerlessTableSkeleton :rows="6" :columns="6" />
-      </table>
-    </template>
-
-    <!-- ⚡ 2. Estado vacío limpio si la búsqueda da 0 resultados -->
-    <template #empty>
-      <div class="py-12 text-center text-zinc-500">
-        No se encontraron clientes coincidentes.
-      </div>
-    </template>
-
-    <!-- ⚡ 3. Tabla real normal (al filtrar o paginar, se atenúa sola al 50%) -->
-    <table class="w-full text-left text-xs">
-      <thead>
-        <tr>
-          <th>Código</th>
-          <th>Razón Social</th>
-          <th>Sector</th>
-          <th>Estado</th>
-          <th>Acción</th>
-        </tr>
-      </thead>
+  <FlickerlessSurface :loading="loading" :preserve-height="true">
+    <table>
+      <thead>…7 columnas…</thead>
       <tbody>
-        <tr 
-          v-for="c in clientes" 
-          :key="c.id"
-          v-flickerless-saving="guardandoId === c.id"
-        >
-          <td>{{ c.codigo }}</td>
-          <td>{{ c.razon_social }}</td>
-          <td>{{ c.sector }}</td>
-          <td>{{ c.estado }}</td>
-          <td>
-            <button @click="$emit('guardar', c.id)">Guardar</button>
-          </td>
-        </tr>
+        <FlickerlessTableShell v-if="loading && !rows.length" :cols="7" />
+        <tr v-else-if="!rows.length"><td colspan="7">Sin resultados.</td></tr>
+        <tr v-for="row in rows" v-else :key="row.id">…</tr>
       </tbody>
     </table>
   </FlickerlessSurface>
 </template>
 ```
 
-> **Nota:** La directiva `v-flickerless-saving="guardandoId === c.id"` aplica el haz de luz y atenuación **únicamente a la fila que se está guardando** en la base de datos sin bloquear el resto de la interfaz.
+El error clásico que esto corrige: `<Skeleton v-if="loading">` borraba las filas en
+**cada** recarga, no solo en la primera.
 
----
-
-### CASO 2: Integración Directa con TanStack Query / Vue Query
-
-Si usas `@tanstack/vue-query` o Pinia Colada, pasa directamente el objeto query con la prop `:query`:
+### Cifras y paneles
 
 ```vue
-<script setup lang="ts">
-import { useQuery } from '@tanstack/vue-query';
-import { FlickerlessSurface, FlickerlessTableSkeleton } from '@flickerless/vue';
-
-// Tu consulta estándar de TanStack Query
-const clientesQuery = useQuery({
-  queryKey: ['clientes', parametros],
-  queryFn: () => fetchClientes(parametros),
-});
-</script>
-
-<template>
-  <!-- Flickerless detecta isPending, isFetching, isPlaceholderData, isEmpty y error automáticamente -->
-  <FlickerlessSurface :query="clientesQuery" :preserve-height="true">
-    <template #skeleton>
-      <FlickerlessTableSkeleton :rows="6" :columns="5" />
-    </template>
-
-    <template #empty>
-      <p>No hay clientes.</p>
-    </template>
-
-    <template #error="{ error }">
-      <p class="text-rose-500">Error al consultar datos: {{ error.message }}</p>
-    </template>
-
-    <!-- Datos reales: al paginar o filtrar se atenúan al 50% con la micro-barra -->
-    <table>
-      <tr v-for="c in clientesQuery.data.value" :key="c.id">
-        <td>{{ c.razon_social }}</td>
-      </tr>
-    </table>
-  </FlickerlessSurface>
-</template>
+<FlickerlessSurface :loading="loading" :settled="loaded" :error="loadError" :empty="!rows.length">
+  <template #empty>Sin ingresos en el período.</template>
+  <p>Ingresos: <FlickerlessValue :value="loaded ? formatMoney(total) : null" /></p>
+</FlickerlessSurface>
 ```
 
----
+```tsx
+// React DOM
+<FlickerlessSurface loading={loading} settled={loaded} error={error} empty={!rows.length} emptyState={<p>Sin ingresos.</p>}>
+  <p>Ingresos: <FlickerlessValue value={loaded ? formatMoney(total) : null} /></p>
+</FlickerlessSurface>
+```
 
-### CASO 3: Gráficos Analíticos (Bar Charts, ApexCharts, Chart.js)
+```tsx
+// React Native
+<FlickerlessSurface loading={loading} settled={loaded} error={error} empty={!rows.length} renderEmpty={() => <EmptyState />}>
+  <FlickerlessValue value={loaded ? formatMoney(total) : null} style={styles.amount} />
+</FlickerlessSurface>
+```
+
+### TanStack Query / Vue Query
 
 ```vue
-<script setup lang="ts">
-import { FlickerlessSurface, FlickerlessChartSkeleton } from '@flickerless/vue';
-
-defineProps<{
-  datosMensuales: any[];
-  cargandoGrafico: boolean;
-}>();
-</script>
-
-<template>
-  <div class="p-6 bg-zinc-950 border border-zinc-800 rounded-3xl">
-    <h3 class="text-sm font-semibold text-zinc-200 mb-4">Facturación Mensual B2B</h3>
-
-    <!-- Reserva su altura exacta (h-56) para 0.00 CLS -->
-    <FlickerlessSurface :loading="cargandoGrafico" :empty="datosMensuales.length === 0">
-      <template #skeleton>
-        <FlickerlessChartSkeleton type="bars" height="h-56" />
-      </template>
-
-      <!-- Al cambiar filtros o fechas, el gráfico actual queda congelado al 50% con la micro-barra superior -->
-      <div class="h-56 w-full">
-        <MiComponenteDeGrafico :datos="datosMensuales" />
-      </div>
-    </FlickerlessSurface>
-  </div>
-</template>
+<FlickerlessSurface :query="invoicesQuery" :preserve-height="true">
+  <template #empty>No hay facturas.</template>
+  <template #error="{ error }">No se pudo cargar: {{ error.message }}</template>
+  <InvoicesTable :rows="invoicesQuery.data.value ?? []" />
+</FlickerlessSurface>
 ```
 
----
-
-### CASO 4: Tarjetas de Métricas y KPIs (Dashboards)
+### Guardado en línea
 
 ```vue
-<script setup lang="ts">
-import { FlickerlessSurface, FlickerlessCardSkeleton } from '@flickerless/vue';
-
-defineProps<{
-  kpis: { clientes: number; ingresos: number; tareas: number; retencion: string } | null;
-  cargandoKpis: boolean;
-}>();
-</script>
-
-<template>
-  <FlickerlessSurface :loading="cargandoKpis" :empty="!kpis">
-    <!-- Carga inicial en frío (1 línea para 4 tarjetas métricas con siluetas) -->
-    <template #skeleton>
-      <FlickerlessCardSkeleton :count="4" type="kpi" />
-    </template>
-
-    <!-- Tarjetas reales -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="p-5 rounded-2xl bg-zinc-900 border border-zinc-800">
-        <div class="text-xs text-zinc-400">Clientes Activos</div>
-        <div class="text-2xl font-bold font-mono text-zinc-100 mt-2">{{ kpis?.clientes }}</div>
-      </div>
-      <!-- más tarjetas... -->
-    </div>
-  </FlickerlessSurface>
-</template>
+<tr v-for="row in rows" :key="row.id" v-flickerless-saving="savingId === row.id">…</tr>
 ```
 
+Atenúa y pinta un haz **solo en la fila que se guarda**, sin bloquear el resto.
+
+### En móvil: el spinner
+
+En móvil el problema mayor es un `<ActivityIndicator size="large">` ocupando la
+pantalla en cada recarga. La regla es la misma: la lista que ya estaba se queda
+atenuada con la barra arriba. Una `FlatList` va dentro de
+`<FlickerlessSurface loading={…} fill>`. El spinner **pequeño dentro de un botón**
+que guarda es legítimo: dice que ESE acto está en curso, no tapa nada.
+
 ---
 
-## ♿ Accesibilidad Universal (a11y)
+## 🎨 Personalización
 
-Flickerless incluye accesibilidad certificada out-of-the-box:
-1. **Lectores de pantalla:** Emite anuncios invisibles `aria-live="polite"` (`aria-busy="true"`) cuando inicia y finaliza una recarga.
-2. **Sensibilidad al movimiento:** Respeta automáticamente `@media (prefers-reduced-motion: reduce)`. Los usuarios con sensibilidad vestibular no verán ondas de luz aceleradas, sino una atenuación estática y suave.
+Los colores por defecto son neutros. La app los sustituye redefiniendo las variables:
+
+```css
+:root {
+  --flickerless-stream-color: var(--my-brand);
+  --flickerless-stream-bg: color-mix(in srgb, var(--my-brand) 15%, transparent);
+  --flickerless-unknown-color: var(--my-text-dim);
+  --flickerless-muted-color: var(--my-text-muted);
+  --flickerless-danger-color: var(--my-danger);
+  --flickerless-saving-beam: rgba(16, 185, 129, 0.18);
+  --flickerless-attenuation-opacity: 0.52;
+  --flickerless-stream-height: 2px;
+}
+```
+
+En React Native: `<FlickerlessColorsProvider value={{ stream, track, unknown }}>`.
 
 ---
 
-## 🎮 Laboratorio Interactivo
+## ♿ Accesibilidad
 
-Puedes probar la comparativa en vivo abriendo el playground en tu terminal:
+1. **Lectores de pantalla:** la superficie anuncia la recarga con `aria-live="polite"` y marca `aria-busy`; un dato desconocido se lee «Sin dato todavía», no «guion».
+2. **Reducir movimiento:** respeta `prefers-reduced-motion` (y `AccessibilityInfo` en React Native): sin barra que corre, solo la atenuación.
+
+---
+
+## 🎮 Laboratorio
 
 ```bash
+npm install
 npm run dev
 ```
 
-En `http://localhost:3000` podrás:
-* Alternar entre **[ ⚡ Flickerless Calm ]** y **[ 💀 Skeleton Clásico ]**.
-* Ajustar la **Latencia de Red** (`150ms`, `400ms`, `900ms`, `1.8s`).
-* Probar el **Flicker Counter** y la puntuación de **Layout Shift (CLS)** en vivo.
-* Probar la mutación en línea con el botón **"Guardar Fila"**.
+En `http://localhost:3000` puedes alternar entre **Flickerless** y **Skeleton clásico**,
+ajustar la latencia de red, forzar una carga en frío y probar el guardado en línea.
+
+## 🧪 Desarrollo
+
+```bash
+npm run build       # todos los paquetes y el playground
+npm run typecheck
+npm test            # tests del controlador (vitest)
+```
 
 ---
 
 ## 📄 Licencia
 
-MIT © Flickerless Team
+MIT © Luis M. Taveras

@@ -1,7 +1,7 @@
 {
   "name": "@flickerless/vue",
   "version": "0.1.0",
-  "description": "Official Vue 3 composables and component for Flickerless data surfaces.",
+  "description": "Vue 3 surface, value and composables for Flickerless: loading without skeletons.",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -17,7 +17,7 @@
     "vue": "^3.3.0"
   },
   "dependencies": {
-    "@flickerless/core": "file:../core"
+    "@flickerless/core": "^0.1.0"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

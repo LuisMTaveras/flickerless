@@ -1,7 +1,7 @@
 {
   "name": "@flickerless/core",
   "version": "0.1.0",
-  "description": "Core framework-agnostic engine, Web Component, and CSS for Flickerless data surfaces.",
+  "description": "Framework-agnostic anti-flicker controller, CSS and optional Web Component for Flickerless data surfaces.",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,14 +10,26 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./element": {
+      "types": "./dist/element.d.ts",
+      "import": "./dist/element.js",
+      "default": "./dist/element.js"
     },
     "./styles.css": "./dist/styles.css"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json && node -e \"require('fs').copyFileSync('src/styles.css', 'dist/styles.css')\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "sideEffects": [
+    "./dist/element.js",
+    "*.css"
+  ],
+  "devDependencies": {
+    "vitest": "^4.1.11"
+  }
 }

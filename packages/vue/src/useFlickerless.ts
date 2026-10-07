@@ -1,5 +1,5 @@
-import { ref, watch, onUnmounted, computed, MaybeRefOrGetter, toValue } from 'vue';
-import { FlickerlessController, FlickerlessOptions, FlickerlessStatus } from '@flickerless/core';
+import { ref, watch, onUnmounted, computed, toValue, type MaybeRefOrGetter } from 'vue';
+import { FlickerlessController, type FlickerlessOptions, type FlickerlessStatus } from '@flickerless/core';
 
 export function useFlickerless(options: MaybeRefOrGetter<FlickerlessOptions>) {
   const isVisibleLoading = ref(false);

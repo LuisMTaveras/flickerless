@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { FlickerlessController, FlickerlessOptions, FlickerlessStatus } from '@flickerless/core';
+import { FlickerlessController, type FlickerlessOptions, type FlickerlessStatus } from '@flickerless/core';
 
 export interface UseFlickerlessReturn {
   isVisibleLoading: boolean;
@@ -19,7 +19,9 @@ export function useFlickerless(options: FlickerlessOptions): UseFlickerlessRetur
   const [status, setStatus] = useState<FlickerlessStatus>('idle');
   const controllerRef = useRef<FlickerlessController | null>(null);
 
-  useEffect(() => {
+  // Se crea en el render (no en un efecto) para que la primera carga cuente
+  // desde el montaje. En StrictMode la limpieza lo destruye y se recrea.
+  if (!controllerRef.current) {
     controllerRef.current = new FlickerlessController({
       ...options,
       onStateChange: (state) => {
@@ -27,15 +29,25 @@ export function useFlickerless(options: FlickerlessOptions): UseFlickerlessRetur
         setStatus(state.status);
       },
     });
-
-    return () => {
-      controllerRef.current?.destroy();
-    };
-  }, []);
+  }
 
   useEffect(() => {
-    controllerRef.current?.update(options);
+    controllerRef.current?.update({
+      loading: options.loading,
+      empty: options.empty,
+      error: options.error,
+      delayMs: options.delayMs,
+      minDurationMs: options.minDurationMs,
+    });
   }, [options.loading, options.empty, options.error, options.delayMs, options.minDurationMs]);
+
+  useEffect(
+    () => () => {
+      controllerRef.current?.destroy();
+      controllerRef.current = null;
+    },
+    [],
+  );
 
   return {
     isVisibleLoading,

@@ -1,4 +1,5 @@
-import { defineComponent, h, PropType, ref, watch, computed } from 'vue';
+import { defineComponent, h, ref, watch, computed, onUnmounted, provide, type PropType } from 'vue';
+import { FLICKERLESS_SETTLED } from './settled';
 import { useFlickerless } from './useFlickerless';
 import { useFlickerlessQuery, type QueryLike } from './useFlickerlessQuery';
 
@@ -13,6 +14,12 @@ export const FlickerlessSurface = defineComponent({
     error: { type: [Boolean, String, Object] as PropType<boolean | string | Error | null>, default: null },
     query: { type: Object as PropType<QueryLike | null>, default: null },
     preserveHeight: { type: Boolean, default: false },
+    /**
+     * Si los datos ya respondieron alguna vez. Sin respuesta no se sabe nada:
+     * ni «vacío» ni «cero» son verdad todavía. Sin la prop, se deduce: la
+     * superficie queda resuelta cuando una carga termina sin error.
+     */
+    settled: { type: Boolean as PropType<boolean | undefined>, default: undefined },
     announce: { type: Boolean, default: true },
     announceText: { type: String, default: 'Cargando actualización de datos...' },
     streamHeight: { type: String, default: undefined },
@@ -36,6 +43,13 @@ export const FlickerlessSurface = defineComponent({
       if (queryState) return queryState.error.value;
       return props.error;
     });
+
+    const loadFinished = ref(!effectiveLoading.value && !effectiveError.value);
+    watch([effectiveLoading, effectiveError], ([loading, error]) => {
+      if (!loading && !error) loadFinished.value = true;
+    });
+    const settled = computed(() => props.settled ?? loadFinished.value);
+    provide(FLICKERLESS_SETTLED, settled);
 
     const { isVisibleLoading, status, surfaceProps, bodyProps } = useFlickerless({
       get loading() {
@@ -61,6 +75,10 @@ export const FlickerlessSurface = defineComponent({
     // 2. Zero-CLS Height Preservation (bloqueo y transición suave de altura)
     const rootEl = ref<HTMLElement | null>(null);
     const lockedHeight = ref<number | null>(null);
+    let releaseTimer: ReturnType<typeof setTimeout> | null = null;
+    onUnmounted(() => {
+      if (releaseTimer) clearTimeout(releaseTimer);
+    });
 
     watch(isVisibleLoading, (isLoading, wasLoading) => {
       if (!props.preserveHeight) return;
@@ -71,8 +89,10 @@ export const FlickerlessSurface = defineComponent({
           lockedHeight.value = Math.round(rect.height);
         }
       } else if (!isLoading && wasLoading) {
-        setTimeout(() => {
+        if (releaseTimer) clearTimeout(releaseTimer);
+        releaseTimer = setTimeout(() => {
           lockedHeight.value = null;
+          releaseTimer = null;
         }, 220);
       }
     });
@@ -114,12 +134,12 @@ export const FlickerlessSurface = defineComponent({
       } else if (isVisibleLoading.value && effectiveEmpty.value && slots.skeleton) {
         // Carga inicial en frío usando slot #skeleton
         children.push(h('div', { class: 'flickerless-body' }, slots.skeleton()));
-      } else if (!isVisibleLoading.value && effectiveEmpty.value && slots.empty) {
-        // Estado vacío limpio usando slot #empty
+      } else if (settled.value && !effectiveLoading.value && effectiveEmpty.value && slots.empty) {
+        // «Vacío» solo con una respuesta en la mano: durante la carga es una afirmación falsa.
         children.push(h('div', { class: 'flickerless-empty-state' }, slots.empty()));
       } else {
         // Contenido real con atenuación al 50% durante recargas
-        children.push(h('div', bodyProps.value, slots.default ? slots.default() : []));
+        children.push(h('div', bodyProps.value, slots.default ? slots.default({ settled: settled.value }) : []));
       }
 
       const surfaceClasses = [

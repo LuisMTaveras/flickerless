@@ -1,4 +1,7 @@
-import { FlickerlessOptions, FlickerlessStatus } from './types';
+import type { FlickerlessOptions, FlickerlessStatus } from './types';
+
+// `performance` no está en todos los entornos (ni en los tipos sin DOM).
+const now = (): number => (globalThis as { performance?: { now(): number } }).performance?.now() ?? Date.now();
 
 export class FlickerlessController {
   private options: FlickerlessOptions;
@@ -61,7 +64,7 @@ export class FlickerlessController {
     }
 
     const minDuration = this.options.minDurationMs ?? 250;
-    const elapsed = performance.now() - this.showStartTime;
+    const elapsed = now() - this.showStartTime;
 
     if (elapsed < minDuration && this.isVisibleLoading) {
       const remaining = minDuration - elapsed;
@@ -78,7 +81,7 @@ export class FlickerlessController {
     if (this.isVisibleLoading === visible) return;
     this.isVisibleLoading = visible;
     if (visible) {
-      this.showStartTime = performance.now();
+      this.showStartTime = now();
     }
     this.notifyState();
   }

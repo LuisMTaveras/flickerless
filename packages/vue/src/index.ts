@@ -1,10 +1,8 @@
 export * from './useFlickerless';
 export * from './useFlickerlessQuery';
 export * from './FlickerlessSurface';
-export * from './FlickerlessSkeleton';
-export * from './FlickerlessFormSkeleton';
-export * from './FlickerlessTableSkeleton';
-export * from './FlickerlessChartSkeleton';
-export * from './FlickerlessCardSkeleton';
+export * from './FlickerlessValue';
+export * from './FlickerlessTableShell';
+export * from './settled';
 export * from './directives';
 export type { FlickerlessOptions, FlickerlessStatus } from '@flickerless/core';

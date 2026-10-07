@@ -9,9 +9,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@flickerless/core": "file:../packages/core"
+    "@flickerless/core": "file:../packages/core",
+    "@flickerless/vue": "file:../packages/vue",
+    "vue": "^3.5.13"
   },
   "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
     "vite": "^6.0.0",
     "typescript": "^5.6.0"
   }

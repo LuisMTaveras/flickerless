@@ -1,192 +1,99 @@
 # @flickerless/vue
 
-> **Componentes y directivas oficiales de Flickerless para Vue 3.**  
-> Soporte nativo para slots orquestados, TanStack Query, prevención de CLS y mutaciones en línea.
+> Superficie, valor y carcasa de tabla de Flickerless para Vue 3: carga sin skeletons.
+> Lo que ya estaba se queda; lo que aún no existe es «—».
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Vue 3](https://img.shields.io/badge/Vue-3.x-emerald.svg)](https://vuejs.org/)
-
----
-
-## 📦 Instalación
+## Instalación
 
 ```bash
 npm install @flickerless/vue @flickerless/core
 ```
 
-En `src/main.ts`:
 ```ts
+// main.ts
 import '@flickerless/core/styles.css';
 ```
 
----
+## Exportables
 
-## 🧩 Componentes y Utilidades
-
-| Exportable | Tipo | Descripción |
+| Exportable | Tipo | Qué hace |
 | :--- | :--- | :--- |
-| `<FlickerlessSurface>` | Componente | Envoltorio inteligente con slots `#skeleton`, `#empty`, `#error`, `:query` y `:preserve-height`. |
-| `<FlickerlessSkeleton>` | Componente | **Primitiva universal** de carga (inputs, botones, avatares, textos). |
-| `<FlickerlessFormSkeleton>` | Componente | **Formularios listos** en 1 línea (etiquetas, inputs, botones de acción). |
-| `<FlickerlessTableSkeleton>` | Componente | Siluetas automáticas para tablas (avatares, códigos monoespaciados, badges). |
-| `<FlickerlessChartSkeleton>` | Componente | Siluetas para gráficos analíticos de barras (`bars`) o área (`area`). |
-| `<FlickerlessCardSkeleton>` | Componente | Siluetas para tarjetas métricas de dashboard (`kpi`) o contactos (`contact`). |
-| `useFlickerlessQuery(query)` | Composable | Normaliza consultas de TanStack Query / Pinia Colada / SWR. |
-| `vFlickerlessSaving` | Directiva | Directiva `v-flickerless-saving` para estados de guardado en fila o botón individual. |
+| `<FlickerlessSurface>` | Componente | Atenúa lo que ya había y pinta la barra de 2 px pasado el umbral (`delayMs`, 180 ms). Props: `loading`, `settled`, `empty`, `error`, `query`, `preserveHeight`, `delayMs`, `minDurationMs`, `announceText`, `streamHeight`, `streamColor`. Slots: `#default="{ settled }"`, `#empty` (solo con respuesta), `#error="{ error }"`. |
+| `<FlickerlessValue>` | Componente | «—» atenuado si `value` es `null`/`undefined` o la superficie aún no respondió. El slot por defecto (`{ value }`) formatea el valor cuando existe. |
+| `<FlickerlessTableShell>` | Componente | Filas reales con «—» en cada celda para la carga en frío de una tabla. Props: `cols` (= número de `<th>`), `rows`, `rowClass`, `cellClass`. |
+| `useFlickerless(options)` | Composable | El controlador anti-parpadeo con estado reactivo (`isVisibleLoading`, `status`). |
+| `useFlickerlessQuery(query)` | Composable | Normaliza TanStack Query / Vue Query / Pinia Colada / SWR. |
+| `FLICKERLESS_SETTLED` | Inyección | Si la superficie que envuelve a un componente ya respondió; para valores propios. |
+| `vFlickerlessSaving` | Directiva | Atenúa y pinta un haz en la fila o el botón que se está guardando. |
 
----
-
-## 🛠️ Ejemplos de Uso
-
-### 1. Con Slots Limpios y Prevención de Saltos de Altura
+## Tabla
 
 ```vue
-<script setup lang="ts">
-import { FlickerlessSurface, FlickerlessTableSkeleton, vFlickerlessSaving } from '@flickerless/vue';
-
-defineProps<{
-  items: any[];
-  cargando: boolean;
-  guardandoId?: string | null;
-}>();
-</script>
-
-<template>
-  <FlickerlessSurface 
-    :loading="cargando" 
-    :empty="items.length === 0" 
-    :preserve-height="true"
-    :delay-ms="180"
-  >
-    <!-- Cold start -->
-    <template #skeleton>
-      <table class="w-full">
-        <FlickerlessTableSkeleton :rows="6" :columns="5" />
-      </table>
-    </template>
-
-    <!-- Empty state -->
-    <template #empty>
-      <p class="text-zinc-500 py-8 text-center">No hay registros.</p>
-    </template>
-
-    <!-- Filas reales (se atenúan al 50% en recargas) -->
-    <table class="w-full">
-      <tbody>
-        <tr 
-          v-for="item in items" 
-          :key="item.id"
-          v-flickerless-saving="guardandoId === item.id"
-        >
-          <td>{{ item.nombre }}</td>
-          <td>{{ item.codigo }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </FlickerlessSurface>
-</template>
+<FlickerlessSurface :loading="loading" :preserve-height="true">
+  <table>
+    <thead>…6 columnas…</thead>
+    <tbody>
+      <FlickerlessTableShell v-if="loading && !rows.length" :cols="6" cell-class="px-4 py-3" />
+      <tr v-else-if="!rows.length"><td colspan="6">Sin resultados.</td></tr>
+      <tr v-for="row in rows" v-else :key="row.id" v-flickerless-saving="savingId === row.id">…</tr>
+    </tbody>
+  </table>
+</FlickerlessSurface>
 ```
 
----
+Una recarga (paginar, filtrar) deja las filas atenuadas; la carcasa solo aparece cuando
+no hay nada que conservar.
 
-### 2. Integración con TanStack Query (`:query`)
+## Cifras
 
 ```vue
-<script setup lang="ts">
-import { useQuery } from '@tanstack/vue-query';
-import { FlickerlessSurface, FlickerlessTableSkeleton } from '@flickerless/vue';
-
-const facturasQuery = useQuery({ queryKey: ['facturas'], queryFn: fetchFacturas });
-</script>
-
-<template>
-  <FlickerlessSurface :query="facturasQuery" :preserve-height="true">
-    <template #skeleton>
-      <FlickerlessTableSkeleton :rows="6" :columns="6" />
-    </template>
-
-    <template #empty>
-      <p>Directorio vacío.</p>
-    </template>
-
-    <table>
-      <tr v-for="f in facturasQuery.data.value" :key="f.id">...</tr>
-    </table>
-  </FlickerlessSurface>
-</template>
+<FlickerlessSurface :loading="loading" :settled="loaded" :error="loadError" :empty="!rows.length">
+  <template #empty>Sin ingresos en el período.</template>
+  <p class="label">Ingresos</p>
+  <p class="amount">
+    <FlickerlessValue :value="loaded ? total : null" v-slot="{ value }">{{ formatMoney(value) }}</FlickerlessValue>
+  </p>
+</FlickerlessSurface>
 ```
 
----
+Nunca `total || 0`: un cero mientras carga es una cifra falsa.
 
-### 3. Formularios, Modales y Drawers (`<FlickerlessFormSkeleton>`)
+## Ficha de detalle
 
 ```vue
-<script setup lang="ts">
-import { FlickerlessSurface, FlickerlessFormSkeleton } from '@flickerless/vue';
-
-defineProps<{
-  cliente: any | null;
-  cargando: boolean;
-}>();
-</script>
-
-<template>
-  <div class="p-6 bg-zinc-950 border border-zinc-800 rounded-2xl max-w-lg">
-    <h3 class="text-sm font-bold text-zinc-100 mb-4">Editar Datos de Facturación</h3>
-
-    <FlickerlessSurface :loading="cargando" :empty="!cliente">
-      <!-- Carga inicial en frío del formulario (etiquetas, inputs y botones) -->
-      <template #skeleton>
-        <FlickerlessFormSkeleton :fields="4" :columns="1" />
-      </template>
-
-      <!-- Formulario real: al guardar o recargar, se atenúa al 50% con la micro-barra -->
-      <form @submit.prevent="guardar" class="space-y-4">
-        <div>
-          <label class="text-xs text-zinc-400">Razón Social</label>
-          <input v-model="cliente.razon_social" class="w-full p-2 bg-zinc-900 border border-zinc-800 rounded" />
-        </div>
-        <div>
-          <label class="text-xs text-zinc-400">RNC</label>
-          <input v-model="cliente.rnc" class="w-full p-2 bg-zinc-900 border border-zinc-800 rounded" />
-        </div>
-        <button type="submit" class="px-4 py-2 bg-emerald-600 rounded text-xs">Guardar Cambios</button>
-      </form>
-    </FlickerlessSurface>
-  </div>
-</template>
+<DocumentShell v-if="loading && !doc" />
+<FlickerlessSurface v-else-if="doc" :loading="loading">…el documento…</FlickerlessSurface>
 ```
 
----
+La carcasa de una ficha es la estructura real de **tu** pantalla (cabecera, fichas,
+líneas) con `<FlickerlessValue />` donde va cada dato; recargar el mismo documento lo
+deja en pantalla, atenuado. Si cambia el sujeto (otro cliente, otro documento), se
+vacía: lo anterior no es suyo.
 
-### 4. Primitivas Libres (`<FlickerlessSkeleton>`)
-
-Para cuando quieres construir maquetas libres estilo *shadcn*:
+## TanStack Query
 
 ```vue
-<script setup lang="ts">
-import { FlickerlessSkeleton } from '@flickerless/vue';
-</script>
-
-<template>
-  <div class="space-y-4">
-    <!-- Avatar circular -->
-    <FlickerlessSkeleton class="w-12 h-12 rounded-full" />
-
-    <!-- Campo de entrada (Input) -->
-    <FlickerlessSkeleton class="h-10 w-full rounded-lg" />
-
-    <!-- Botón -->
-    <FlickerlessSkeleton class="h-9 w-32 rounded-md" />
-
-    <!-- Línea de texto -->
-    <FlickerlessSkeleton class="h-4 w-3/4 rounded" />
-  </div>
-</template>
+<FlickerlessSurface :query="invoicesQuery" :preserve-height="true">
+  <template #empty>No hay facturas.</template>
+  <template #error="{ error }">No se pudo cargar: {{ error.message }}</template>
+  <InvoicesTable :rows="invoicesQuery.data.value ?? []" />
+</FlickerlessSurface>
 ```
 
----
+## Migrar desde los `Flickerless*Skeleton`
 
-## 📄 Licencia
+Los componentes `FlickerlessSkeleton`, `FlickerlessTableSkeleton`, `FlickerlessCardSkeleton`,
+`FlickerlessChartSkeleton` y `FlickerlessFormSkeleton` y sus clases CSS
+(`.flickerless-skeleton`, `.shimmer-surface`, `.flickerless-chart-*`) **ya no existen**:
 
-MIT © Flickerless Team
+| Antes | Ahora |
+| :--- | :--- |
+| `<FlickerlessTableSkeleton>` en `#skeleton` | `<FlickerlessTableShell>` dentro del `<tbody>` real |
+| `<FlickerlessCardSkeleton type="kpi">` | Las tarjetas reales con `<FlickerlessValue>` en cada cifra y `:settled` en la superficie |
+| `<FlickerlessChartSkeleton>` | El marco del gráfico con su alto, vacío hasta la respuesta |
+| `<FlickerlessFormSkeleton>` | El formulario real; los campos se llenan al responder |
+| `:empty="isColdStart"` para forzar el frío | `:settled="!isColdStart"` |
+
+## Licencia
+
+MIT
