@@ -50,10 +50,14 @@ export function FlickerlessSurface({
   const { isVisibleLoading } = useFlickerless({ loading, delayMs, minDurationMs, empty, error });
   const colors = useFlickerlessColors();
 
-  const [loadFinished, setLoadFinished] = useState(!loading && !error);
+  // Resuelta = hubo una respuesta. Montar con loading=false y la lista vacía NO es una
+  // respuesta (la petición aún no salió): seguir así sería pintar «vacío» y «0» falsos.
+  const sawLoading = useRef(loading);
+  const [loadFinished, setLoadFinished] = useState(!loading && !error && !empty);
   useEffect(() => {
-    if (!loading && !error) setLoadFinished(true);
-  }, [loading, error]);
+    if (loading) sawLoading.current = true;
+    else if (!error && (sawLoading.current || !empty)) setLoadFinished(true);
+  }, [loading, error, empty]);
   const settled = settledProp ?? loadFinished;
 
   const [width, setWidth] = useState(0);

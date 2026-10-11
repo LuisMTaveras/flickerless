@@ -18,7 +18,7 @@ import '@flickerless/core/styles.css';
 
 | Exportable | Tipo | Qué hace |
 | :--- | :--- | :--- |
-| `<FlickerlessSurface>` | Componente | Atenúa lo que ya había y pinta la barra de 2 px pasado el umbral (`delayMs`, 180 ms). Props: `loading`, `settled`, `empty`, `error`, `query`, `preserveHeight`, `delayMs`, `minDurationMs`, `announceText`, `streamHeight`, `streamColor`. Slots: `#default="{ settled }"`, `#empty` (solo con respuesta), `#error="{ error }"`. |
+| `<FlickerlessSurface>` | Componente | Atenúa lo que ya había y pinta la barra de 2 px pasado el umbral (`delayMs`, 180 ms). Props: `loading`, `settled`, `empty`, `error`, `query` (la query o un getter; una página `{ items: [] }` / `{ edges: [] }` cuenta como vacía), `preserveHeight`, `delayMs`, `minDurationMs`, `announceText`, `errorText`, `streamHeight`, `streamColor`. Slots: `#default="{ settled }"`, `#empty` (solo con respuesta), `#error="{ error }"`. |
 | `<FlickerlessValue>` | Componente | «—» atenuado si `value` es `null`/`undefined` o la superficie aún no respondió. El slot por defecto (`{ value }`) formatea el valor cuando existe. |
 | `<FlickerlessTableShell>` | Componente | Filas reales con «—» en cada celda para la carga en frío de una tabla. Props: `cols` (= número de `<th>`), `rows`, `rowClass`, `cellClass`. |
 | `useFlickerless(options)` | Composable | El controlador anti-parpadeo con estado reactivo (`isVisibleLoading`, `status`). |
