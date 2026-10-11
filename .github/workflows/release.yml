@@ -35,6 +35,13 @@ jobs:
             test "$(node -p "require('./$p').version")" = "$v" || { echo "$p no está en $v"; exit 1; }
           done
           echo "VERSION=$v" >> "$GITHUB_ENV"
+      - name: Diagnóstico del token (usuario y organización; nunca imprime el token)
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          echo "Usuario del token: $(npm whoami 2>&1)"
+          echo "Miembros de la organización flickerless:"; npm org ls flickerless 2>&1 || true
+          echo "Acceso del token a @flickerless:"; npm access list packages @flickerless 2>&1 || true
       - run: pnpm release --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
