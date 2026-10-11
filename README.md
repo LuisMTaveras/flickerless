@@ -233,7 +233,7 @@ pnpm e2e            # Vue, React y el Web Component en Chromium real (Playwright
 
 ### Publicar
 
-Una sola vez: crea en npm un token granular con permiso de publicar en `@flickerless` y guárdalo como secreto
+Una sola vez: crea en el registro (npmjs.com, el mismo que usa pnpm) la organización `flickerless` y un token granular con permiso de publicar en `@flickerless` y guárdalo como secreto
 `NPM_TOKEN` del repositorio. Después, cada versión es:
 
 ```bash
@@ -241,7 +241,7 @@ Una sola vez: crea en npm un token granular con permiso de publicar en `@flicker
 git tag v0.2.0 && git push origin v0.2.0   # el workflow Release verifica y publica con provenance
 ```
 
-Desde tu máquina también vale: `pnpm release` (con `npm login` hecho).
+Desde tu máquina también vale: `pnpm login` (una vez) y `pnpm release`.
 
 ---
 
