@@ -1,6 +1,6 @@
 {
   "name": "flickerless",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Zero-flicker, layout-stable data loading for tables, lists and dashboards. What stays stays; what is unknown is «—». The replacement for skeletons.",
   "workspaces": [
@@ -11,7 +11,8 @@
     "dev": "npm --workspace=playground run dev",
     "build": "npm --workspaces --if-present run build",
     "typecheck": "npm --workspaces --if-present run typecheck",
-    "test": "npm --workspaces --if-present run test"
+    "test": "npm --workspaces --if-present run test",
+    "smoke": "node scripts/ssr-smoke.mjs"
   },
   "keywords": [
     "skeleton-alternative",

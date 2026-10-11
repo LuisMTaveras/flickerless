@@ -1,7 +1,7 @@
 import { defineComponent, h, ref, watch, computed, onUnmounted, provide, type PropType } from 'vue';
-import { FLICKERLESS_SETTLED } from './settled';
-import { useFlickerless } from './useFlickerless';
-import { useFlickerlessQuery, type QueryLike } from './useFlickerlessQuery';
+import { FLICKERLESS_SETTLED } from './settled.js';
+import { useFlickerless } from './useFlickerless.js';
+import { useFlickerlessQuery, type QueryLike } from './useFlickerlessQuery.js';
 
 export const FlickerlessSurface = defineComponent({
   name: 'FlickerlessSurface',

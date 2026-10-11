@@ -1,7 +1,8 @@
 {
   "name": "@flickerless/core",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Framework-agnostic anti-flicker controller, CSS and optional Web Component for Flickerless data surfaces.",
+  "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -31,5 +32,10 @@
   ],
   "devDependencies": {
     "vitest": "^4.1.11"
-  }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ]
 }

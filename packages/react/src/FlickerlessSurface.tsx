@@ -1,7 +1,8 @@
+'use client';
 import React, { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { FlickerlessOptions } from '@flickerless/core';
-import { useFlickerless } from './useFlickerless';
-import { SettledContext } from './settled';
+import { useFlickerless } from './useFlickerless.js';
+import { SettledContext } from './settled.js';
 
 export interface FlickerlessSurfaceProps extends FlickerlessOptions {
   /**

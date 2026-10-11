@@ -1,5 +1,6 @@
+'use client';
 import React from 'react';
-import { FlickerlessValue } from './FlickerlessValue';
+import { FlickerlessValue } from './FlickerlessValue.js';
 
 export interface FlickerlessTableShellProps {
   /** Columnas de la tabla. Tiene que coincidir con el número de `<th>`. */

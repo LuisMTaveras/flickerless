@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { FlickerlessController } from './controller';
+import { FlickerlessController } from './controller.js';
 
 function track(options: ConstructorParameters<typeof FlickerlessController>[0]) {
   const states: boolean[] = [];

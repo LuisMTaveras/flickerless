@@ -1,4 +1,4 @@
-import { FlickerlessController } from './controller';
+import { FlickerlessController } from './controller.js';
 
 export class FlickerlessElement extends HTMLElement {
   private controller!: FlickerlessController;
