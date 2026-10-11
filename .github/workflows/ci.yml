@@ -11,6 +11,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+          package-manager-cache: false # pnpm aún no existe aquí: lo activa corepack en el paso siguiente
       # pnpm sale de corepack con la versión de "packageManager" (sin acciones de terceros en Node 20).
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
