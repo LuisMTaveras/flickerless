@@ -19,10 +19,16 @@
 
 ### Changed
 - Development uses **pnpm** workspaces (`pnpm install`, `pnpm build`, `pnpm test`).
+- CI and Release use `actions/checkout@v5` / `setup-node@v5` and pnpm from corepack (no Node 20 actions).
+- Playground on Vite 7.
 
 ### Added
 - **React parity**: `query` and `preserveHeight` on `FlickerlessSurface`, and `useFlickerlessQuery`.
 - **React Native errors**: `renderError` and `errorText` (inline notice; `''` turns it off); `danger` color (optional).
+- **React Native parity**: `query` and `preserveHeight` on `FlickerlessSurface`; `isEmptyValue` / `readQueryState` re-exported.
+- React Native tests (vitest + a small react-native stand-in: they check the surface logic, not native rendering).
+- Browser tests (`pnpm e2e`, Playwright + Chromium): Vue, React under StrictMode and the Web Component, including
+  `preserveHeight` measured on real layout. They run in CI.
 - `isEmptyValue` / `readQueryState` in `@flickerless/core`: one rule for «empty» and «answered» in every adapter.
 - Component tests (Vue Test Utils, Testing Library, jsdom) for the surfaces and the Web Component.
 - Release workflow: push a `vX.Y.Z` tag and it publishes the four packages with provenance (needs `NPM_TOKEN`).

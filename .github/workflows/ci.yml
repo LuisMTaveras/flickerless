@@ -7,14 +7,16 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
-          cache: pnpm
+      # pnpm sale de corepack con la versión de "packageManager" (sin acciones de terceros en Node 20).
+      - run: corepack enable
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm smoke
+      - run: pnpm --filter e2e exec playwright install --with-deps chromium
+      - run: pnpm e2e

@@ -7,4 +7,5 @@ export type { UseFlickerlessOptions } from './useFlickerless';
 export { FlickerlessColorsProvider, useFlickerlessColors } from './colors';
 export type { FlickerlessColors } from './colors';
 export { useSettled } from './settled';
-export type { FlickerlessStatus } from '@flickerless/core';
+export type { FlickerlessStatus, QuerySnapshot, QueryState } from '@flickerless/core';
+export { isEmptyValue, readQueryState } from '@flickerless/core';

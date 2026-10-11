@@ -1,11 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Easing, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { readQueryState, type QuerySnapshot } from '@flickerless/core';
 import { useFlickerless } from './useFlickerless';
 import { DEFAULT_DANGER, useFlickerlessColors } from './colors';
 import { SettledContext } from './settled';
 
 export interface FlickerlessSurfaceProps {
-  loading: boolean;
+  /** Hay una petición en vuelo. Con `query` se deduce de ella. */
+  loading?: boolean;
+  /**
+   * El resultado de una query (TanStack Query, SWR, Apollo…): se leen `isFetching`, `isPending`,
+   * `error` y `data`. Una página `{ items: [] }` cuenta como vacía. Las props sueltas ganan.
+   */
+  query?: QuerySnapshot | null;
+  /** Fija la altura mientras el indicador está visible: la lista no salta al recargar. */
+  preserveHeight?: boolean;
   /**
    * Si los datos ya respondieron alguna vez. Sin respuesta no se sabe nada:
    * ni «vacío» ni «cero» son verdad todavía. Sin la prop se deduce: la
@@ -39,10 +48,12 @@ const STREAM_WIDTH = 0.32;
  * rápida que `delayMs` no enseña ningún indicador.
  */
 export function FlickerlessSurface({
-  loading,
+  loading: loadingProp,
+  query,
+  preserveHeight = false,
   settled: settledProp,
-  empty = false,
-  error = null,
+  empty: emptyProp,
+  error: errorProp,
   delayMs = 180,
   minDurationMs = 250,
   renderEmpty,
@@ -53,6 +64,10 @@ export function FlickerlessSurface({
   fill = false,
   announceText = 'Actualizando',
 }: FlickerlessSurfaceProps) {
+  const fromQuery = query ? readQueryState(query) : null;
+  const loading = loadingProp ?? fromQuery?.loading ?? false;
+  const empty = emptyProp ?? fromQuery?.isEmpty ?? false;
+  const error = errorProp ?? (fromQuery?.error as FlickerlessSurfaceProps['error']) ?? null;
   const { isVisibleLoading } = useFlickerless({ loading, delayMs, minDurationMs, empty, error });
   const colors = useFlickerlessColors();
   const danger = colors.danger ?? DEFAULT_DANGER;
@@ -66,7 +81,20 @@ export function FlickerlessSurface({
     if (loading) sawLoading.current = true;
     else if (!empty || (!error && sawLoading.current)) setLoadFinished(true);
   }, [loading, error, empty]);
-  const settled = settledProp ?? loadFinished;
+  const settled = settledProp ?? (fromQuery ? fromQuery.settled : loadFinished);
+
+  // Zero-CLS: al aparecer el indicador se fija la última altura medida; se suelta 220 ms después.
+  const heightRef = useRef(0);
+  const [lockedHeight, setLockedHeight] = useState<number | null>(null);
+  useEffect(() => {
+    if (!preserveHeight) return;
+    if (isVisibleLoading) {
+      if (heightRef.current > 0) setLockedHeight(heightRef.current);
+      return;
+    }
+    const t = setTimeout(() => setLockedHeight(null), 220);
+    return () => clearTimeout(t);
+  }, [isVisibleLoading, preserveHeight]);
 
   const [width, setWidth] = useState(0);
   const [reduceMotion, setReduceMotion] = useState(false);
@@ -112,7 +140,14 @@ export function FlickerlessSurface({
 
   return (
     <SettledContext.Provider value={settled}>
-      <View style={[fill && styles.fill, style]} onLayout={(e) => setWidth(e.nativeEvent.layout.width)} accessibilityState={{ busy: isVisibleLoading }}>
+      <View
+        style={[fill && styles.fill, style, preserveHeight && lockedHeight ? { minHeight: lockedHeight } : null]}
+        onLayout={(e) => {
+          setWidth(e.nativeEvent.layout.width);
+          heightRef.current = Math.round(e.nativeEvent.layout.height);
+        }}
+        accessibilityState={{ busy: isVisibleLoading }}
+      >
         <View style={[styles.track, { backgroundColor: isVisibleLoading ? colors.track : 'transparent' }]} pointerEvents="none">
           {isVisibleLoading ? (
             <Animated.View

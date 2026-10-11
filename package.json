@@ -9,7 +9,8 @@
     "typecheck": "pnpm -r --filter \"./packages/*\" typecheck",
     "test": "pnpm -r --filter \"./packages/*\" --if-present test",
     "smoke": "node scripts/ssr-smoke.mjs",
-    "release": "pnpm build && pnpm test && pnpm smoke && pnpm -r --filter \"./packages/*\" publish"
+    "release": "pnpm build && pnpm test && pnpm smoke && pnpm -r --filter \"./packages/*\" publish",
+    "e2e": "pnpm --filter e2e test"
   },
   "keywords": [
     "skeleton-alternative",

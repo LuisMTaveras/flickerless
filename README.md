@@ -228,6 +228,7 @@ pnpm build          # todos los paquetes
 pnpm typecheck
 pnpm test           # controlador, Web Component y componentes Vue / React (vitest + jsdom)
 pnpm smoke          # los paquetes construidos cargan en Node (SSR)
+pnpm e2e            # Vue, React y el Web Component en Chromium real (Playwright)
 ```
 
 ### Publicar
