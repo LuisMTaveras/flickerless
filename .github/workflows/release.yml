@@ -1,11 +1,18 @@
 name: Release
-# Publica los cuatro paquetes en npm al empujar un tag vX.Y.Z (git tag v0.2.0 && git push origin v0.2.0).
-# Requiere el secreto NPM_TOKEN (npmjs.com, el registro que usa pnpm → Access Tokens → Granular, con permiso de publicar en @flickerless).
+# Publica los cuatro paquetes con pnpm en el registro (npmjs.com). Dos formas de lanzarlo:
+#  - empujar un tag vX.Y.Z:            git tag v0.2.0 && git push origin v0.2.0
+#  - a mano (Actions → Release → Run workflow) con la versión; el workflow crea el tag al publicar.
+# Requiere el secreto NPM_TOKEN (npmjs.com → Access Tokens → Granular, con permiso de publicar en @flickerless).
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Versión a publicar (debe coincidir con packages/*/package.json), p. ej. 0.2.0'
+        required: true
 permissions:
-  contents: read
+  contents: write # crear el tag cuando se lanza a mano
   id-token: write # provenance: npm enlaza cada versión con este workflow
 jobs:
   publish:
@@ -19,12 +26,22 @@ jobs:
           registry-url: https://registry.npmjs.org
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
-      - name: El tag coincide con la versión de los paquetes
+      - name: La versión pedida coincide con la de los paquetes
+        env:
+          REQUESTED: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
         run: |
-          v="${GITHUB_REF_NAME#v}"
+          v="${REQUESTED#v}"
           for p in packages/*/package.json; do
             test "$(node -p "require('./$p').version")" = "$v" || { echo "$p no está en $v"; exit 1; }
           done
+          echo "VERSION=$v" >> "$GITHUB_ENV"
       - run: pnpm release --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Tag de la versión (solo al lanzarlo a mano)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git tag -a "v$VERSION" -m "flickerless $VERSION"
+          git push origin "v$VERSION"
