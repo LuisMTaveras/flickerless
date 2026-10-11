@@ -3,16 +3,13 @@
   "version": "0.2.0",
   "private": true,
   "description": "Zero-flicker, layout-stable data loading for tables, lists and dashboards. What stays stays; what is unknown is «—». The replacement for skeletons.",
-  "workspaces": [
-    "packages/*",
-    "playground"
-  ],
   "scripts": {
-    "dev": "npm --workspace=playground run dev",
-    "build": "npm --workspaces --if-present run build",
-    "typecheck": "npm --workspaces --if-present run typecheck",
-    "test": "npm --workspaces --if-present run test",
-    "smoke": "node scripts/ssr-smoke.mjs"
+    "dev": "pnpm --filter playground dev",
+    "build": "pnpm -r --filter \"./packages/*\" build",
+    "typecheck": "pnpm -r --filter \"./packages/*\" typecheck",
+    "test": "pnpm -r --filter \"./packages/*\" --if-present test",
+    "smoke": "node scripts/ssr-smoke.mjs",
+    "release": "pnpm build && pnpm -r --filter \"./packages/*\" publish --access public"
   },
   "keywords": [
     "skeleton-alternative",
@@ -33,6 +30,11 @@
     "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "tailwindcss": "^4.3.3"
-  }
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3",
+    "vue": "^3.5.43"
+  },
+  "packageManager": "pnpm@10.28.0"
 }

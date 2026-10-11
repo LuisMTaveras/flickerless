@@ -92,9 +92,9 @@ facturas del cliente anterior pondría facturas ajenas bajo el nombre del nuevo.
 ## 📦 Instalación
 
 ```bash
-npm install @flickerless/vue @flickerless/core      # Vue 3
-npm install @flickerless/react @flickerless/core    # React DOM
-npm install @flickerless/react-native @flickerless/core
+pnpm add @flickerless/vue @flickerless/core      # Vue 3
+pnpm add @flickerless/react @flickerless/core    # React DOM
+pnpm add @flickerless/react-native @flickerless/core
 ```
 
 En la web, importa los estilos una sola vez:
@@ -214,8 +214,8 @@ En React Native: `<FlickerlessColorsProvider value={{ stream, track, unknown }}>
 ## 🎮 Laboratorio
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 En `http://localhost:3000` puedes alternar entre **Flickerless** y **Skeleton clásico**,
@@ -224,9 +224,10 @@ ajustar la latencia de red, forzar una carga en frío y probar el guardado en l�
 ## 🧪 Desarrollo
 
 ```bash
-npm run build       # todos los paquetes y el playground
-npm run typecheck
-npm test            # tests del controlador (vitest)
+pnpm build          # todos los paquetes
+pnpm typecheck
+pnpm test           # controlador, Web Component y componentes Vue / React (vitest + jsdom)
+pnpm smoke          # los paquetes construidos cargan en Node (SSR)
 ```
 
 ---

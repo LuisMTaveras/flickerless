@@ -6,7 +6,7 @@ Lo que ya estaba se queda; lo que aún no existe es «—».
 ## Instalación
 
 ```bash
-npm install @flickerless/react @flickerless/core
+pnpm add @flickerless/react @flickerless/core
 ```
 
 ```ts

@@ -6,7 +6,7 @@ un Web Component opcional.
 ## Instalación
 
 ```bash
-npm install @flickerless/core
+pnpm add @flickerless/core
 ```
 
 ## El controlador

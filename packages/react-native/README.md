@@ -7,7 +7,7 @@ spinners que tapan la pantalla. Lo que ya estaba se queda, atenuado, con una bar
 ## Instalación
 
 ```bash
-npm install @flickerless/react-native @flickerless/core
+pnpm add @flickerless/react-native @flickerless/core
 ```
 
 Sin CSS: la barra es una `Animated.View` con el driver nativo, y respeta «reducir

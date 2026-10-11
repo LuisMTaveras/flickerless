@@ -6,7 +6,7 @@
 ## Instalación
 
 ```bash
-npm install @flickerless/vue @flickerless/core
+pnpm add @flickerless/vue @flickerless/core
 ```
 
 ```ts

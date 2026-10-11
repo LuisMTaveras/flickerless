@@ -9,8 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@flickerless/core": "file:../packages/core",
-    "@flickerless/vue": "file:../packages/vue",
+    "@flickerless/core": "workspace:*",
+    "@flickerless/vue": "workspace:*",
     "vue": "^3.5.13"
   },
   "devDependencies": {

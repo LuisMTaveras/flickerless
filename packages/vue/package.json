@@ -17,7 +17,7 @@
     "vue": "^3.3.0"
   },
   "dependencies": {
-    "@flickerless/core": "^0.2.0"
+    "@flickerless/core": "workspace:^"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
