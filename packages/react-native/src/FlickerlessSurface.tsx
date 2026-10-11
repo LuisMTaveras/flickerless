@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Easing, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import { useFlickerless } from './useFlickerless';
-import { useFlickerlessColors } from './colors';
+import { DEFAULT_DANGER, useFlickerlessColors } from './colors';
 import { SettledContext } from './settled';
 
 export interface FlickerlessSurfaceProps {
@@ -55,7 +55,7 @@ export function FlickerlessSurface({
 }: FlickerlessSurfaceProps) {
   const { isVisibleLoading } = useFlickerless({ loading, delayMs, minDurationMs, empty, error });
   const colors = useFlickerlessColors();
-  const danger = colors.danger ?? '#dc2626';
+  const danger = colors.danger ?? DEFAULT_DANGER;
 
   // Resuelta = hubo una respuesta. Montar con loading=false y la lista vacía NO es una
   // respuesta (la petición aún no salió): seguir así sería pintar «vacío» y «0» falsos.

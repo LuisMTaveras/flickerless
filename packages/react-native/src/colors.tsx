@@ -11,12 +11,15 @@ export interface FlickerlessColors {
   danger?: string;
 }
 
+/** Rojo neutro del aviso de error cuando el tema no trae `danger`. */
+export const DEFAULT_DANGER = 'rgba(220, 38, 38, 1)';
+
 // Neutros sin marca: la app los sustituye por los de su tema con el proveedor.
 const NEUTRAL: FlickerlessColors = {
   stream: 'rgba(127, 127, 127, 0.9)',
   track: 'rgba(127, 127, 127, 0.18)',
   unknown: 'rgba(127, 127, 127, 0.7)',
-  danger: '#dc2626',
+  danger: DEFAULT_DANGER,
 };
 
 const ColorsContext = createContext<FlickerlessColors>(NEUTRAL);
