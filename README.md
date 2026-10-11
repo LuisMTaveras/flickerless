@@ -45,7 +45,7 @@ Un skeleton y un spinner grande fallan igual en lo que importa:
 | **`FlickerlessSurface`** | Envuelve una zona de datos. Si la respuesta tarda menos de `delayMs` (180 ms) no enseña nada; si tarda más, **atenúa lo que ya había** y pinta una barra de 2 px arriba. El estado vacío solo aparece **con una respuesta en la mano**. |
 | **`FlickerlessValue`** | Un dato que puede no existir todavía. Pinta «—» atenuado (y «Sin dato todavía» para el lector de pantalla) si `value` es `null`/`undefined` o si la superficie que lo envuelve aún no respondió. |
 | **`settled`** | Si la superficie ya tuvo una respuesta. Sin la prop se deduce: una carga terminada sin error, o datos ya presentes al montar. Montar con `loading=false` y la lista vacía **no** cuenta como respuesta (la petición aún no salió). Se pasa explícita cuando la pantalla ya lo sabe. |
-| **`errorText`** | Lo que se avisa cuando la carga falla y no hay slot `#error` / `errorState`: el error nunca se traga en silencio; lo que había se conserva debajo. Por defecto «No se pudo cargar la información.». |
+| **`errorText`** | Lo que se avisa cuando la carga falla y no hay slot `#error` / `errorState`: el error nunca se traga en silencio; lo que había se conserva debajo. Por defecto «No se pudo cargar la información.»; `""` lo apaga cuando la pantalla ya pinta su propio aviso. |
 
 Y una carcasa lista para la carga en frío de una tabla: **`FlickerlessTableShell`**
 (Vue y React), filas reales con «—» en cada celda.
