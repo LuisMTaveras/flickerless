@@ -7,6 +7,8 @@ export interface FlickerlessColors {
   track: string;
   /** El «—» de un dato que aún no existe. */
   unknown: string;
+  /** El aviso de una carga fallida. Opcional: sin él, un rojo neutro. */
+  danger?: string;
 }
 
 // Neutros sin marca: la app los sustituye por los de su tema con el proveedor.
@@ -14,6 +16,7 @@ const NEUTRAL: FlickerlessColors = {
   stream: 'rgba(127, 127, 127, 0.9)',
   track: 'rgba(127, 127, 127, 0.18)',
   unknown: 'rgba(127, 127, 127, 0.7)',
+  danger: '#dc2626',
 };
 
 const ColorsContext = createContext<FlickerlessColors>(NEUTRAL);

@@ -39,10 +39,11 @@ export const FlickerlessSurface = defineComponent({
     // Resuelta = hubo una respuesta. Montar con loading=false y la lista vacía NO es una
     // respuesta (la petición aún no salió): seguir así sería pintar «vacío» y «0» falsos.
     const sawLoading = ref(effectiveLoading.value);
-    const loadFinished = ref(!effectiveLoading.value && !effectiveError.value && !effectiveEmpty.value);
+    // Con datos en la mano (aunque la última recarga fallara) lo que hay es verdad.
+    const loadFinished = ref(!effectiveLoading.value && !effectiveEmpty.value);
     watch([effectiveLoading, effectiveError, effectiveEmpty], ([loading, error, empty]) => {
       if (loading) sawLoading.value = true;
-      else if (!error && (sawLoading.value || !empty)) loadFinished.value = true;
+      else if (!empty || (!error && sawLoading.value)) loadFinished.value = true;
     });
     const settled = computed(() => props.settled ?? (props.query ? queryState.settled.value : loadFinished.value));
     provide(FLICKERLESS_SETTLED, settled);

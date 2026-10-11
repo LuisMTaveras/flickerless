@@ -17,9 +17,9 @@ movimiento» del sistema.
 
 | Exportable | Qué hace |
 | :--- | :--- |
-| `FlickerlessSurface` | Props: `loading`, `settled`, `empty`, `error`, `renderEmpty` (solo con respuesta), `delayMs`, `minDurationMs`, `fill` (ocupa el alto disponible, para una `FlatList`), `announceText`, `style`. `children` puede ser `({ settled }) => …`. |
+| `FlickerlessSurface` | Props: `loading`, `settled`, `empty`, `error`, `renderEmpty` (solo con respuesta), `renderError` (reemplaza al contenido cuando falla), `errorText` (aviso sin `renderError`; `''` lo apaga), `delayMs`, `minDurationMs`, `fill` (ocupa el alto disponible, para una `FlatList`), `announceText`, `style`. `children` puede ser `({ settled }) => …`. |
 | `FlickerlessValue` | Un `Text` con «—» si `value` es `null`/`undefined` o la superficie aún no respondió. `children` opcional: `(value) => …`. |
-| `FlickerlessColorsProvider` | Colores de la barra (`stream`), su riel (`track`) y el «—» (`unknown`). Por defecto, neutros. |
+| `FlickerlessColorsProvider` | Colores de la barra (`stream`), su riel (`track`) el «—» (`unknown`) y el aviso de error (`danger`, opcional). Por defecto, neutros. |
 | `useFlickerless(options)` | El controlador anti-parpadeo con estado de React. |
 | `useSettled()` / `useFlickerlessColors()` | Lecturas del contexto, para carcasas propias. |
 

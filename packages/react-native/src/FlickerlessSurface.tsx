@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { AccessibilityInfo, Animated, Easing, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { AccessibilityInfo, Animated, Easing, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import { useFlickerless } from './useFlickerless';
 import { useFlickerlessColors } from './colors';
 import { SettledContext } from './settled';
@@ -18,6 +18,10 @@ export interface FlickerlessSurfaceProps {
   minDurationMs?: number;
   /** Lo que se pinta con una respuesta vacía. Nunca durante la carga. */
   renderEmpty?: () => React.ReactNode;
+  /** Lo que se pinta cuando la carga falla (mensaje + «Reintentar»). Reemplaza al contenido. */
+  renderError?: (error: boolean | string | Error) => React.ReactNode;
+  /** Aviso cuando la carga falla y no hay `renderError`: el error nunca se traga en silencio. `''` si la pantalla ya lo avisa. */
+  errorText?: string;
   children?: React.ReactNode | ((state: { settled: boolean }) => React.ReactNode);
   style?: StyleProp<ViewStyle>;
   /** Ocupa el alto disponible (para una FlatList o un ScrollView dentro). */
@@ -42,6 +46,8 @@ export function FlickerlessSurface({
   delayMs = 180,
   minDurationMs = 250,
   renderEmpty,
+  renderError,
+  errorText = 'No se pudo cargar la información.',
   children,
   style,
   fill = false,
@@ -49,14 +55,16 @@ export function FlickerlessSurface({
 }: FlickerlessSurfaceProps) {
   const { isVisibleLoading } = useFlickerless({ loading, delayMs, minDurationMs, empty, error });
   const colors = useFlickerlessColors();
+  const danger = colors.danger ?? '#dc2626';
 
   // Resuelta = hubo una respuesta. Montar con loading=false y la lista vacía NO es una
   // respuesta (la petición aún no salió): seguir así sería pintar «vacío» y «0» falsos.
   const sawLoading = useRef(loading);
-  const [loadFinished, setLoadFinished] = useState(!loading && !error && !empty);
+  // Con datos en la mano (aunque la última recarga fallara) lo que hay es verdad.
+  const [loadFinished, setLoadFinished] = useState(!loading && !empty);
   useEffect(() => {
     if (loading) sawLoading.current = true;
-    else if (!error && (sawLoading.current || !empty)) setLoadFinished(true);
+    else if (!empty || (!error && sawLoading.current)) setLoadFinished(true);
   }, [loading, error, empty]);
   const settled = settledProp ?? loadFinished;
 
@@ -116,8 +124,20 @@ export function FlickerlessSurface({
             />
           ) : null}
         </View>
+        {error && !renderError && errorText ? (
+          // Sin renderError: se avisa y se conserva lo que había.
+          <View accessibilityRole="alert" style={[styles.errorInline, { borderColor: danger }]}>
+            <Text style={[styles.errorText, { color: danger }]}>{errorText}</Text>
+          </View>
+        ) : null}
         <Animated.View style={[fill && styles.fill, { opacity }]}>
-          {showEmpty ? renderEmpty() : typeof children === 'function' ? children({ settled }) : children}
+          {error && renderError
+            ? renderError(error)
+            : showEmpty
+              ? renderEmpty()
+              : typeof children === 'function'
+                ? children({ settled })
+                : children}
         </Animated.View>
       </View>
     </SettledContext.Provider>
@@ -128,4 +148,6 @@ const styles = StyleSheet.create({
   fill: { flex: 1 },
   track: { height: 2, overflow: 'hidden' },
   stream: { height: 2, borderRadius: 999 },
+  errorInline: { marginBottom: 8, borderWidth: 1, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8 },
+  errorText: { fontSize: 13 },
 });

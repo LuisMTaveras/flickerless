@@ -17,10 +17,11 @@ import '@flickerless/core/styles.css';
 
 | Exportable | Qué hace |
 | :--- | :--- |
-| `FlickerlessSurface` | Atenúa lo que ya había y pinta la barra de 2 px pasado el umbral. Props: `loading`, `settled`, `empty`, `error`, `emptyState` (solo con respuesta), `errorState`, `errorText`, `delayMs`, `minDurationMs`, `announceText`, `streamHeight`, `streamColor`. `children` puede ser una función `({ settled }) => …`. |
+| `FlickerlessSurface` | Atenúa lo que ya había y pinta la barra de 2 px pasado el umbral. Props: `loading`, `settled`, `empty`, `error`, `query` (el resultado de TanStack Query / SWR / Apollo; una página `{ items: [] }` cuenta como vacía; las props sueltas ganan), `preserveHeight` (fija la altura durante la recarga), `emptyState` (solo con respuesta), `errorState`, `errorText`, `delayMs`, `minDurationMs`, `announceText`, `streamHeight`, `streamColor`. `children` puede ser una función `({ settled }) => …`. |
 | `FlickerlessValue` | «—» atenuado si `value` es `null`/`undefined` o la superficie aún no respondió. `children` opcional: `(value) => …`. |
 | `FlickerlessTableShell` | Filas reales con «—» para la carga en frío de una tabla. Props: `cols`, `rows`, `rowClassName`, `cellClassName`. |
 | `useFlickerless(options)` | El controlador anti-parpadeo (`isVisibleLoading`, `status`, `surfaceProps`, `bodyProps`). |
+| `useFlickerlessQuery(query)` | `{ loading, isInitialLoading, isRefetching, isEmpty, settled, error }` con el mismo criterio que la superficie, para pintar algo fuera de ella. |
 | `useSettled()` | Si la superficie que envuelve al componente ya respondió (`null` sin superficie). |
 
 ## Uso

@@ -51,3 +51,11 @@ import '@flickerless/core/element';
   <table>…</table>
 </flickerless-surface>
 ```
+
+Atributos: `loading`, `empty`, `error` (presente = error, aunque esté vacío; `error="false"` no), `delay`
+(= 180), `min-duration` (= 250) y `announce-text` (= «Actualizando…»). Todos se pueden cambiar en vivo. El
+elemento escribe `data-loading`, `data-status` y `aria-busy`, y mueve a `.flickerless-body` también los hijos
+que se añadan después de montarlo.
+
+`isEmptyValue(data)` y `readQueryState(query)` son el criterio común de «vacío» y «ya respondió» que usan los
+adaptadores; sirven para una vista propia.

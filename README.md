@@ -230,6 +230,18 @@ pnpm test           # controlador, Web Component y componentes Vue / React (vite
 pnpm smoke          # los paquetes construidos cargan en Node (SSR)
 ```
 
+### Publicar
+
+Una sola vez: crea en npm un token granular con permiso de publicar en `@flickerless` y guárdalo como secreto
+`NPM_TOKEN` del repositorio. Después, cada versión es:
+
+```bash
+# sube la versión en los cuatro packages/*/package.json y anota CHANGELOG.md
+git tag v0.2.0 && git push origin v0.2.0   # el workflow Release verifica y publica con provenance
+```
+
+Desde tu máquina también vale: `pnpm release` (con `npm login` hecho).
+
 ---
 
 ## 📄 Licencia

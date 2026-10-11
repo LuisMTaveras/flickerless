@@ -31,11 +31,22 @@
     "*.css"
   ],
   "devDependencies": {
+    "jsdom": "^26.1.0",
     "vitest": "^4.1.11"
   },
   "files": [
     "dist",
     "README.md",
     "LICENSE"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LuisMTaveras/flickerless.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/LuisMTaveras/flickerless#readme",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
 }

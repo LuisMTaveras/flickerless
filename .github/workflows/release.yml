@@ -1,0 +1,30 @@
+name: Release
+# Publica los cuatro paquetes en npm al empujar un tag vX.Y.Z (git tag v0.2.0 && git push origin v0.2.0).
+# Requiere el secreto NPM_TOKEN (npm → Access Tokens → Granular, con permiso de publicar en @flickerless).
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+  id-token: write # provenance: npm enlaza cada versión con este workflow
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - run: pnpm install --frozen-lockfile
+      - name: El tag coincide con la versión de los paquetes
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          for p in packages/*/package.json; do
+            test "$(node -p "require('./$p').version")" = "$v" || { echo "$p no está en $v"; exit 1; }
+          done
+      - run: pnpm release --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
