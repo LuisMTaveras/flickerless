@@ -1,5 +1,4 @@
 'use client';
-import React from 'react';
 import { FlickerlessValue } from './FlickerlessValue.js';
 
 export interface FlickerlessTableShellProps {
