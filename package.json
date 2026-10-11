@@ -10,7 +10,8 @@
     "test": "pnpm -r --filter \"./packages/*\" --if-present test",
     "smoke": "node scripts/ssr-smoke.mjs",
     "release": "pnpm build && pnpm test && pnpm smoke && pnpm -r --filter \"./packages/*\" publish",
-    "e2e": "pnpm --filter e2e test"
+    "e2e": "pnpm --filter e2e test",
+    "pack:all": "pnpm build && pnpm -r --filter \"./packages/*\" exec pnpm pack --pack-destination ../../packs"
   },
   "keywords": [
     "skeleton-alternative",

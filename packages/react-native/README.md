@@ -6,9 +6,8 @@ spinners que tapan la pantalla. Lo que ya estaba se queda, atenuado, con una bar
 
 ## Instalación
 
-```bash
-pnpm add @flickerless/react-native @flickerless/core
-```
+No está publicado en npmjs.com: se instala con DEVFORGE, desde el `.tgz` (`pnpm pack:all` en la raíz) o como
+copia del código. Pasos en el [README principal](../../README.md#-instalación).
 
 Sin CSS: la barra es una `Animated.View` con el driver nativo, y respeta «reducir
 movimiento» del sistema.

@@ -5,9 +5,8 @@
 
 ## Instalación
 
-```bash
-pnpm add @flickerless/vue @flickerless/core
-```
+No está publicado en npmjs.com: se instala con DEVFORGE, desde el `.tgz` (`pnpm pack:all` en la raíz) o como
+copia del código. Pasos en el [README principal](../../README.md#-instalación).
 
 ```ts
 // main.ts

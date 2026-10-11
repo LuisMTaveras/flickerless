@@ -91,11 +91,37 @@ facturas del cliente anterior pondría facturas ajenas bajo el nombre del nuevo.
 
 ## 📦 Instalación
 
+> Los paquetes `@flickerless/*` **no están publicados en npmjs.com**: `pnpm add @flickerless/vue` no los encuentra.
+> Se usan de una de estas tres formas.
+
+**1. Con DEVFORGE** (Vue o React): copia el código al proyecto, con los imports al alias `@/`.
+
 ```bash
-pnpm add @flickerless/vue @flickerless/core      # Vue 3
-pnpm add @flickerless/react @flickerless/core    # React DOM
-pnpm add @flickerless/react-native @flickerless/core
+devforge add flickerless          # o --vue / --react
 ```
+
+**2. Desde los `.tgz` de este repo** (cualquier proyecto con pnpm):
+
+```bash
+# en este repo: construye y empaqueta los cuatro paquetes en ./packs
+pnpm pack:all
+
+# en tu proyecto: copia los que uses a vendor/ e instálalos
+pnpm add ./vendor/flickerless-core-0.2.0.tgz ./vendor/flickerless-vue-0.2.0.tgz   # o -react / -react-native
+```
+
+Los adaptadores dependen de `@flickerless/core`; para que pnpm no lo busque en el registro, el `package.json`
+de tu proyecto lleva:
+
+```json
+"pnpm": { "overrides": { "@flickerless/core": "file:vendor/flickerless-core-0.2.0.tgz" } }
+```
+
+Para actualizar: `pnpm pack:all` de la versión nueva, reemplaza los `.tgz` y vuelve a correr `pnpm add`.
+
+**3. Como copia del código fuente** (lo que hace Snowlr): `packages/<paquete>/src` dentro de tu monorepo como
+paquete del workspace (`"main": "./src/index.ts"`). Si una app de **React Native** lo consume desde `src`, quita
+la extensión `.js` de los imports relativos: Metro no traduce `./x.js` a `x.ts`.
 
 En la web, importa los estilos una sola vez:
 
@@ -231,17 +257,11 @@ pnpm smoke          # los paquetes construidos cargan en Node (SSR)
 pnpm e2e            # Vue, React y el Web Component en Chromium real (Playwright)
 ```
 
-### Publicar
+### Publicar en npm (opcional)
 
-Una sola vez: crea en el registro (npmjs.com, el mismo que usa pnpm) la organización `flickerless` y un token granular con permiso de publicar en `@flickerless` y guárdalo como secreto
-`NPM_TOKEN` del repositorio. Después, cada versión es:
-
-```bash
-# sube la versión en los cuatro packages/*/package.json y anota CHANGELOG.md
-git tag v0.2.0 && git push origin v0.2.0   # el workflow Release verifica y publica con provenance
-```
-
-Desde tu máquina también vale: `pnpm login` (una vez) y `pnpm release`.
+Hoy no se publica. El workflow `Release` (Actions → Release → Run workflow) queda listo por si algún día se hace:
+necesita la organización `flickerless` en npmjs.com y un token granular con escritura sobre `@flickerless` y
+«bypass 2FA», guardado como secreto `NPM_TOKEN`.
 
 ---
 
