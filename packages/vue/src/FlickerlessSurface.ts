@@ -48,7 +48,7 @@ export const FlickerlessSurface = defineComponent({
     const settled = computed(() => props.settled ?? (props.query ? queryState.settled.value : loadFinished.value));
     provide(FLICKERLESS_SETTLED, settled);
 
-    const { isVisibleLoading, status, surfaceProps, bodyProps } = useFlickerless({
+    const { isVisibleLoading, surfaceProps, bodyProps } = useFlickerless({
       get loading() {
         return effectiveLoading.value;
       },
