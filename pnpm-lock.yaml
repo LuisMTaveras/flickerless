@@ -8,6 +8,15 @@ importers:
 
   .:
     devDependencies:
+      '@flickerless/core':
+        specifier: workspace:*
+        version: link:packages/core
+      '@flickerless/react':
+        specifier: workspace:*
+        version: link:packages/react
+      '@flickerless/vue':
+        specifier: workspace:*
+        version: link:packages/vue
       '@tailwindcss/vite':
         specifier: ^4.3.3
         version: 4.3.3(vite@6.4.4(@types/node@26.6.5)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.51.2)(yaml@2.9.1))
