@@ -6,3 +6,7 @@
 - `cls/` — medición real de CLS (Playwright + `PerformanceObserver('layout-shift')`) sobre `playground/`, con skeleton y Flickerless. Resultados en `cls.json` / `below.json`.
 
 Resultado (latencia 800 ms, media de 3 corridas): recarga Skeleton 0.006 vs Flickerless 0.000; primera carga Skeleton 0.006 vs Flickerless 0.0145.
+
+## Versión vertical (Reels / TikTok)
+
+`vertical/flickerless-vertical.mp4` — 1080×1920, 73 s. Guion propio más corto; subtítulos dentro de la zona segura de las apps. Fuente: `vertical/vertical.html`, `timing_v.js`, `narrate_v.py`, `render_v.js`.
