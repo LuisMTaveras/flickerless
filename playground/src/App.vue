@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue';
 import IndicadoresClaveView from './views/IndicadoresClaveView.vue';
 import CohortesView from './views/CohortesView.vue';
 import FacturacionView from './views/FacturacionView.vue';
@@ -13,8 +13,59 @@ const simulatedLatency = ref(400);
 const isDark = ref(true);
 const periodo = ref('Este año');
 
-// Telemetría
-const flickerCount = ref(0);
+// Telemetría medida en vivo sobre el DOM real (no hay valores escritos a mano):
+//  - CLS: suma de entradas `layout-shift` (PerformanceObserver), incluidas las que
+//    ocurren tras un clic (aquí el clic dispara la carga, así que no se descartan).
+//  - Parpadeos: veces que aparece un bloque de cajas grises de skeleton.
+//  - Divs: elementos de skeleton creados.
+type Telemetry = { cls: number; flashes: number; divs: number };
+const telemetry = reactive<Record<'flickerless' | 'skeleton', Telemetry>>({
+  flickerless: { cls: 0, flashes: 0, divs: 0 },
+  skeleton: { cls: 0, flashes: 0, divs: 0 },
+});
+const metrics = computed(() => telemetry[comparisonMode.value]);
+const clsLabel = computed(() => {
+  const v = metrics.value.cls;
+  return `${v.toFixed(3)} (${v <= 0.1 ? 'Bueno' : v <= 0.25 ? 'Mejorable' : 'Deficiente'})`;
+});
+
+let layoutObserver: PerformanceObserver | undefined;
+let domObserver: MutationObserver | undefined;
+
+onMounted(() => {
+  try {
+    layoutObserver = new PerformanceObserver((list) => {
+      for (const entry of list.getEntries() as unknown as Array<{ value: number }>) {
+        telemetry[comparisonMode.value].cls += entry.value;
+      }
+    });
+    layoutObserver.observe({ type: 'layout-shift', buffered: false });
+  } catch {
+    /* navegador sin layout-shift: el CLS queda en 0.000 */
+  }
+
+  const isBox = (n: Node): n is Element => n instanceof Element && n.classList.contains('classic-skeleton-box');
+  domObserver = new MutationObserver((records) => {
+    for (const r of records) {
+      let boxes = 0;
+      r.addedNodes.forEach((n) => {
+        if (!(n instanceof Element)) return;
+        boxes += (isBox(n) ? 1 : 0) + n.querySelectorAll('.classic-skeleton-box').length;
+      });
+      if (boxes > 0) {
+        const t = telemetry[comparisonMode.value];
+        t.divs += boxes;
+        t.flashes += 1;
+      }
+    }
+  });
+  domObserver.observe(document.body, { childList: true, subtree: true });
+});
+
+onBeforeUnmount(() => {
+  layoutObserver?.disconnect();
+  domObserver?.disconnect();
+});
 
 function toggleTheme() {
   isDark.value = !isDark.value;
@@ -29,10 +80,6 @@ function triggerFetch(cold = false) {
   if (isLoading.value) return;
   isLoading.value = true;
   isColdStart.value = cold;
-
-  if (comparisonMode.value === 'skeleton') {
-    flickerCount.value += 1;
-  }
 
   // Alternar período para simular cambio de datos reales
   if (!cold) {
@@ -129,27 +176,27 @@ function triggerFetch(cold = false) {
 
           <div class="flex items-center gap-6 font-mono text-xs">
             <div class="text-right">
-              <div class="text-[10px] uppercase text-zinc-500 font-sans">Parpadeos Sufridos</div>
+              <div class="text-[10px] uppercase text-zinc-500 font-sans">Parpadeos medidos</div>
               <div 
                 class="text-base font-extrabold"
-                :class="comparisonMode === 'flickerless' ? 'text-emerald-400' : 'text-rose-400 animate-pulse'"
+                :class="metrics.flashes === 0 ? 'text-emerald-400' : 'text-rose-400'"
               >
-                {{ comparisonMode === 'flickerless' ? '0 flickers' : `${flickerCount} flickers` }}
+                {{ metrics.flashes }} {{ metrics.flashes === 1 ? 'flicker' : 'flickers' }}
               </div>
             </div>
             <div class="text-right">
               <div class="text-[10px] uppercase text-zinc-500 font-sans">Layout Shift (CLS)</div>
               <div 
                 class="text-base font-extrabold"
-                :class="comparisonMode === 'flickerless' ? 'text-emerald-400' : 'text-amber-400'"
+                :class="metrics.cls <= 0.1 ? 'text-emerald-400' : 'text-amber-400'"
               >
-                {{ comparisonMode === 'flickerless' ? '0.000 (Perfecto)' : '0.380 (Deficiente)' }}
+                {{ clsLabel }}
               </div>
             </div>
             <div class="text-right">
-              <div class="text-[10px] uppercase text-zinc-500 font-sans">Divs Creados</div>
+              <div class="text-[10px] uppercase text-zinc-500 font-sans">Divs de skeleton</div>
               <div class="text-base font-extrabold text-zinc-300">
-                {{ comparisonMode === 'flickerless' ? '0 divs' : '54 divs' }}
+                {{ metrics.divs }} divs
               </div>
             </div>
           </div>
