@@ -15,7 +15,7 @@ SCRIPT=[
  ],1.0),
  ('cold',[
   ("La <mark>primera carga</mark>: todavía no hay datos.","Veamos ahora la primera carga, cuando todavía no hay datos."),
-  ("<r>Skeleton: $0.00 y “0 registros”. Cifras falsas.</r><br><g>Flickerless: “—”. El dato aún no se conoce.</g>","El skeleton muestra cero pesos y cero registros: cifras falsas. Flickerless muestra un guion, porque el dato aún no se conoce."),
+  ("<r>Skeleton: $0.00 y “0 registros”. Cifras falsas.</r><br><g>Flickerless: “—”. El dato aún no se conoce.</g>","El skeleton muestra cero pesos y cero registros: cifras falsas. Flickerless muestra un marcador neutro, porque el dato todavía está pendiente."),
   ("En finanzas, un cero no es un espacio vacío: <mark>es un dato incorrecto</mark>.","En una pantalla financiera, un cero no es un espacio vacío. Es un dato incorrecto."),
  ],1.0),
  ('maint',[
@@ -34,7 +34,7 @@ SCRIPT=[
   ("Para <mark>tablas y paneles de negocio</mark>, Flickerless evita el parpadeo, conserva lo que había, no inventa ceros y no exige una maqueta aparte.","Para tablas y paneles de negocio, Flickerless evita el parpadeo, conserva lo que ya estaba en pantalla, no inventa ceros, y no exige mantener una maqueta aparte."),
  ],1.0),
  ('outro',[
-  ("<g>Flickerless</g>: lo que ya estaba se queda; lo que aún no existe es “—”.","Flickerless. Lo que ya estaba, se queda. Lo que aún no existe, se muestra como un guion."),
+  ("<g>Flickerless</g>: lo que ya estaba se queda; lo que aún no existe es “—”.","Flickerless. Lo que ya estaba, se queda. Lo que aún no existe, se representa con un marcador neutro."),
   ("Disponible para <mark>Vue, React y React Native</mark>.","Disponible para Vue, React y React Native."),
  ],2.5),
 ]
