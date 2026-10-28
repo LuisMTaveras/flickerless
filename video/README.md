@@ -1,6 +1,6 @@
 # Video: Flickerless vs Skeleton
 
-- `flickerless-vs-skeleton.mp4` — 132 s, 1080p, voz en español (Kokoro `em_alex`, TTS local) + música ambiental.
+- `flickerless-vs-skeleton.mp4` — 157 s, 1080p, voz en español (Kokoro `em_alex`, TTS local) + música ambiental.
 - `scenes.html` + `timing.js` + `render.js` — animación determinista (HTML) renderizada cuadro a cuadro con Playwright; ffmpeg la une con el audio.
 - `tts/narrate.py` — guion, síntesis de voz y línea de tiempo (las escenas se sincronizan con la duración real de cada frase).
 - `cls/` — medición real de CLS (Playwright + `PerformanceObserver('layout-shift')`) sobre `playground/`, con skeleton y Flickerless. Resultados en `cls.json` / `below.json`.
