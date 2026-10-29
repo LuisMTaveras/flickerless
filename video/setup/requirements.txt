@@ -1,0 +1,8 @@
+# Voz (elige una; edge-tts es gratis y no pide cuenta)
+edge-tts
+elevenlabs          # opcional, de pago: la voz más natural
+kokoro-onnx         # voz local sin internet (la que se usó en la v1)
+# Verificación y apoyo
+faster-whisper      # transcribe el audio final para comprobar la pronunciación
+soundfile
+numpy

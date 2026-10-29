@@ -1,0 +1,10 @@
+{
+ "playground tal cual | skeleton | reload": 0.006,
+ "playground tal cual | skeleton | cold": 0.006,
+ "playground tal cual | flickerless | reload": 0,
+ "playground tal cual | flickerless | cold": 0.0079,
+ "con contenido debajo | skeleton | reload": 0.0065,
+ "con contenido debajo | skeleton | cold": 0.0065,
+ "con contenido debajo | flickerless | reload": 0,
+ "con contenido debajo | flickerless | cold": 0.0079
+}

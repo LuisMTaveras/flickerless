@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Flickerless vs Skeleton</title>
+<script src="timing.js"></script>
+<style>
+:root{--paper:#f2eee4;--ink:#15130e;--mut:#6b6558;--line:#d8d1be;--card:#fffdf7;--red:#d2361e;--grn:#0f7a49;--amb:#f4b400;--grey:#e1dacb}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1920px;height:1080px;overflow:hidden;background:var(--paper);font-family:'Inter Display',Inter,sans-serif;color:var(--ink)}
+#root{position:absolute;inset:0}
+.abs{position:absolute}.scene{position:absolute;inset:0}
+.mono{font-family:'JetBrains Mono',monospace}
+.sub{position:absolute;left:0;right:0;bottom:44px;display:flex;justify-content:center}
+.sub div{background:var(--ink);color:#f2eee4;font-size:40px;font-weight:600;line-height:1.3;padding:16px 34px;border-radius:6px;text-align:center;max-width:1560px}
+.sub r{color:#ff8f78}.sub g{color:#62d9a0}.sub b{font-weight:800}
+.sub mark{background:var(--amb);color:var(--ink);padding:0 8px;border-radius:3px}
+.lab{position:absolute;top:96px;display:flex;align-items:center;gap:16px;font-size:36px;font-weight:900;letter-spacing:.04em}
+.lab i{width:26px;height:26px;display:block}
+.app{position:absolute;top:190px;width:840px;background:var(--card);border:2px solid var(--ink);border-radius:10px;padding:24px 28px;overflow:hidden}
+.app.r{box-shadow:12px 12px 0 var(--red)}.app.g{box-shadow:12px 12px 0 var(--grn)}
+.hd{display:flex;justify-content:space-between;align-items:center;height:44px}
+.hd h3{font-size:32px;font-weight:800}
+.chip{font-size:24px;font-weight:600;padding:6px 18px;border-radius:6px;background:var(--paper);border:2px solid var(--ink)}
+.kpi{margin-top:14px;height:98px;border-radius:8px;background:var(--paper);border:1px solid var(--line);padding:12px 22px}
+.kpi small{display:block;font-size:20px;color:var(--mut);height:26px;font-weight:500}
+.kpi .v{font-size:44px;font-weight:800;height:48px;display:flex;align-items:center;font-variant-numeric:tabular-nums}
+.tw{position:relative;margin-top:14px;overflow:hidden}
+.th,.tr{display:flex;height:64px;align-items:center;font-size:27px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.th{height:52px;font-size:19px;color:var(--mut);font-weight:700;letter-spacing:.06em}
+.c1{width:150px}.c2{width:290px}.c3{width:170px}.c4{width:200px;text-align:right}
+.tr .c4{font-weight:700}
+.gb{height:22px;border-radius:5px;background:var(--grey)}
+.dash{color:var(--mut)}
+.ft{height:44px;font-size:22px;color:var(--mut);display:flex;align-items:center}
+.bar{position:absolute;left:0;right:0;top:0;height:4px;background:var(--line);z-index:3}
+.bar i{position:absolute;top:0;bottom:0;width:30%;background:var(--grn)}
+.cursor{position:absolute;width:38px;height:38px;z-index:9}
+.ripple{position:absolute;border:4px solid var(--ink);border-radius:50%;z-index:8}
+.call{position:absolute;padding:9px 18px;border-radius:4px;font-size:26px;font-weight:700;z-index:10;white-space:nowrap}
+.call.r{background:var(--red);color:#fff}.call.g{background:var(--grn);color:#fff}
+.tag{display:inline-block;font-size:26px;font-weight:700;padding:5px 16px;border-radius:4px}
+.tag.g{background:var(--grn);color:#fff}
+.file{position:absolute;width:390px;height:104px;border-radius:8px;background:var(--card);border:2px solid var(--ink);padding:16px 20px;font-size:30px;font-weight:700}
+.file small{display:block;font-size:21px;color:var(--mut);font-weight:500;margin-top:4px}
+.mt{display:flex;height:62px;align-items:center;border-bottom:1px solid var(--line);font-size:27px}
+.mc{width:150px;padding:0 6px}
+.mh{font-weight:700;color:var(--mut);letter-spacing:.06em;font-size:20px}
+.sr{display:flex;align-items:center;height:122px;border-bottom:2px solid var(--ink)}
+.sr .lb{width:430px;font-size:36px;font-weight:800}
+.sr .a,.sr .b{width:590px;font-size:29px;display:flex;align-items:center;gap:18px}
+.sr .a{color:var(--mut)}
+.ic{width:46px;height:46px;border-radius:50%;flex:none;position:relative}
+.ic.x{background:var(--red)}.ic.k{background:var(--grn)}
+.ic.x:before,.ic.x:after{content:"";position:absolute;left:12px;top:21px;width:22px;height:4px;border-radius:2px;background:#fff}
+.ic.x:before{transform:rotate(45deg)}.ic.x:after{transform:rotate(-45deg)}
+.ic.k:before{content:"";position:absolute;left:16px;top:9px;width:10px;height:21px;border:solid #fff;border-width:0 5px 5px 0;transform:rotate(45deg)}
+</style></head>
+<body><div id="root"></div>
+<script>
+const $=(s)=>document.getElementById(s);
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const ease=(x)=>{x=clamp(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2};
+const fade=(lt,d,i=.5,o=.5)=>clamp(Math.min(lt/i,(d-lt)/o));
+const money=(n)=>'$'+n.toLocaleString('en-US',{minimumFractionDigits:2});
+const TM=window.TIMING;
+
+const DATA={
+  A:{filter:'Este mes',total:48250,rows:[['F-1042','Acme S.A.','12 mar',4820],['F-1041','Nova Corp','11 mar',12300],['F-1040','Orbita SRL','09 mar',7415.5],['F-1039','Delta Group','08 mar',23714.5]]},
+  B:{filter:'Mes anterior',total:31980,rows:[['F-1031','Helio Ltd','28 feb',9100],['F-1030','Acme S.A.','25 feb',15640],['F-1029','Zeta Labs','21 feb',7240]]}
+};
+const ROWH=64, XL=90, XR=990;
+
+function appHTML(vm){
+  const d=DATA[vm.ds||'A'], op=vm.pulse!==undefined?vm.pulse:1;
+  let kpi=vm.kpi==='grey'?`<div class="gb" style="width:200px;height:30px;opacity:${op}"></div>`:(vm.kpi===null?`<span class="dash">—</span>`:vm.kpi);
+  let rows='';
+  if(vm.mode==='real') rows=d.rows.map(r=>`<div class="tr"><div class="c1">${r[0]}</div><div class="c2">${r[1]}</div><div class="c3">${r[2]}</div><div class="c4">${money(r[3])}</div></div>`).join('');
+  else if(vm.mode==='skel') for(let i=0;i<vm.nSkel;i++) rows+=`<div class="tr"><div class="c1"><div class="gb" style="width:90px;opacity:${op}"></div></div><div class="c2"><div class="gb" style="width:190px;opacity:${op}"></div></div><div class="c3"><div class="gb" style="width:100px;opacity:${op}"></div></div><div class="c4"><div class="gb" style="width:120px;margin-left:auto;opacity:${op}"></div></div></div>`;
+  else for(let i=0;i<vm.nShell;i++) rows+=`<div class="tr dash"><div class="c1">—</div><div class="c2">—</div><div class="c3">—</div><div class="c4">—</div></div>`;
+  const minH=vm.minRows?`min-height:${vm.minRows*ROWH}px;`:'';
+  const bar=vm.bar!=null?`<div class="bar"><i style="left:${-30+vm.bar*130}%"></i></div>`:'';
+  const ft=vm.footer==='grey'?`<div class="gb" style="width:160px;height:16px;opacity:${op}"></div>`:vm.footer;
+  return `<div class="app ${vm.cls}" style="left:${vm.x}px">
+   <div class="hd"><h3>Facturación</h3><div class="chip">${vm.filter} ▾</div></div>
+   <div class="kpi"><small>Total facturado</small><div class="v">${kpi}</div></div>
+   <div class="tw" style="${minH}">${bar}
+    <div class="th"><div class="c1">N.º</div><div class="c2">CLIENTE</div><div class="c3">FECHA</div><div class="c4">TOTAL</div></div>
+    <div style="opacity:${vm.dim!==undefined?vm.dim:1}">${rows}</div></div>
+   <div class="ft">${ft}</div></div>`;
+}
+const footY=(rows)=>438+rows*ROWH;
+function labels(){return `<div class="lab" style="left:${XL}px;color:var(--red)"><i style="background:var(--red)"></i>SKELETON</div><div class="lab" style="left:${XR}px;color:var(--grn)"><i style="background:var(--grn)"></i>FLICKERLESS</div>`}
+function cursorSvg(x,y){return `<svg class="cursor" style="left:${x}px;top:${y}px" viewBox="0 0 24 24"><path d="M3 2l7 19 3-8 8-3z" fill="#fff" stroke="#15130e" stroke-width="1.8"/></svg>`}
+function cursors(lt,tc){
+  let out=''; const a=ease((lt-(tc-.9))/.8), p=(lt-tc)/.5;
+  const o=clamp((lt-(tc-.9))/.2)*clamp((tc+1.2-lt)/.3);
+  for(const X of [XL,XR]){
+    const cx=X+840-28-70, cy=190+24+22, sx=cx+170, sy=cy+210;
+    const x=sx+(cx-sx)*a, y=sy+(cy-sy)*a;
+    let rip=''; if(p>0&&p<1){const r=10+p*50;rip=`<div class="ripple" style="left:${cx-r}px;top:${cy-r}px;width:${2*r}px;height:${2*r}px;opacity:${1-p}"></div>`}
+    out+=`<div style="opacity:${o}">${cursorSvg(x,y)}${rip}</div>`;
+  }
+  return out;
+}
+function sub(lt,sc){
+  for(const g of sc.segs){ if(lt>=g.a-.15&&lt<g.b+.6){ const o=clamp(Math.min((lt-g.a+.15)/.25,(g.b+.6-lt)/.4)); return `<div class="sub" style="opacity:${o}"><div>${g.sub}</div></div>`; } }
+  return '';
+}
+
+function sTitle(lt,sc){
+  const o=fade(lt,sc.d,.5,.5);
+  const a=ease((lt-.3)/.7),b=ease((lt-.9)/.7),c=ease((lt-1.9)/.7);
+  return `<div class="scene" style="opacity:${o}">
+   <div class="abs" style="left:160px;top:250px">
+    <div style="font-size:176px;font-weight:900;letter-spacing:-.045em;line-height:1;color:var(--grn);opacity:${a};transform:translateY(${(1-a)*24}px)">Flickerless</div>
+    <div style="font-size:48px;font-weight:600;color:var(--mut);margin:14px 0 6px 8px;opacity:${b}">contra</div>
+    <div style="font-size:176px;font-weight:900;letter-spacing:-.045em;line-height:1;color:var(--red);opacity:${b};transform:translateY(${(1-b)*24}px);display:inline-block">Skeleton</div>
+    <div style="font-size:48px;font-weight:600;margin-top:56px;opacity:${c}">Por qué tus datos no deberían <span style="background:var(--amb);padding:0 12px;border-radius:4px">parpadear</span></div>
+   </div>
+   <div class="abs" style="right:150px;top:300px;width:520px;opacity:${b}">
+    <div style="border:2px solid var(--ink);border-radius:10px;background:var(--card);padding:34px;box-shadow:12px 12px 0 var(--red)">
+      ${[300,220,260,180].map((w,i)=>`<div class="gb" style="width:${w}px;height:30px;margin:20px 0;opacity:${.55+.45*Math.sin(lt*5+i)}"></div>`).join('')}
+    </div></div>
+  </div>`;
+}
+
+function sReload(lt,sc){
+  const o=fade(lt,sc.d,.5,.5), S=sc.segs;
+  const click=S[0].b-.3, req=click+.45, resp=S[2].a+.2;
+  const loading=lt>=req&&lt<resp, ds=lt<resp?'A':'B';
+  const filter=lt<click+.1?DATA.A.filter:DATA.B.filter;
+  const pulse=.55+.45*Math.sin(lt*8);
+  const nR=DATA[ds].rows.length;
+  const SK={x:XL,cls:'r',filter,ds,mode:loading?'skel':'real',nSkel:5,kpi:loading?'grey':money(DATA[ds].total),footer:loading?'grey':`Mostrando ${nR} de ${nR}`,pulse};
+  const dimmed=loading&&lt>=req+.18;
+  const FL={x:XR,cls:'g',filter,ds,mode:'real',kpi:money(DATA[ds].total),footer:`Mostrando ${nR} de ${nR}`,dim:dimmed?.4:1,bar:dimmed?((lt-req-.18)*.55)%1:null,minRows:4};
+  let calls='';
+  if(lt>=req&&lt<req+2.4) calls+=`<div class="call r" style="left:${XL+420}px;top:${footY(5)+24}px;opacity:${clamp((lt-req)*3)*clamp((req+2.4-lt)*3)}">▼ la tabla cambia de tamaño</div>`;
+  if(lt>=resp&&lt<resp+2.6) calls+=`<div class="call r" style="left:${XL+420}px;top:${footY(nR)+24}px;opacity:${clamp((lt-resp)*3)*clamp((resp+2.6-lt)*3)}">▲ y cambia otra vez</div>`;
+  if(lt>=resp+.4&&lt<resp+3.4) calls+=`<div class="call g" style="left:${XR+420}px;top:${footY(4)+24}px;opacity:${clamp((lt-resp-.4)*3)*clamp((resp+3.4-lt)*3)}">sin movimiento</div>`;
+  return `<div class="scene" style="opacity:${o}">${labels()}${appHTML(SK)}${appHTML(FL)}${cursors(lt,click)}${calls}${sub(lt,sc)}</div>`;
+}
+
+function sFast(lt,sc){
+  const o=fade(lt,sc.d,.5,.5), S=sc.segs;
+  const click=S[1].a+.2, req=S[1].a+1.7, resp=req+.6;
+  const loading=lt>=req&&lt<resp, ds=lt<resp?'A':'B';
+  const filter=lt<click+.1?DATA.A.filter:DATA.B.filter;
+  const pulse=.7+.3*Math.sin(lt*10);
+  const nR=DATA[ds].rows.length;
+  const SK={x:XL,cls:'r',filter,ds,mode:loading?'skel':'real',nSkel:5,kpi:loading?'grey':money(DATA[ds].total),footer:loading?'grey':`Mostrando ${nR} de ${nR}`,pulse};
+  const FL={x:XR,cls:'g',filter,ds,mode:'real',kpi:money(DATA[ds].total),footer:`Mostrando ${nR} de ${nR}`,minRows:4};
+  const ms=lt<req?0:clamp((lt-req)*250,0,300);
+  const x0=300,w=1320,px=(m)=>x0+w*m/300;
+  const sa=clamp((lt-S[0].a)*2);
+  const pulseT=lt>S[2].a?1+.12*Math.sin((lt-S[2].a)*6):1;
+  const strip=`<div class="abs" style="left:0;right:0;top:790px;height:110px;opacity:${sa}">
+   <div class="abs mono" style="left:${x0-120}px;top:22px;font-size:24px;color:var(--mut);font-weight:700">0 ms</div>
+   <div class="abs" style="left:${x0}px;top:40px;width:${w}px;height:8px;background:var(--line)"></div>
+   <div class="abs" style="left:${x0}px;top:40px;width:${w*ms/300}px;height:8px;background:var(--ink)"></div>
+   <div class="abs" style="left:${px(150)-3}px;top:20px;width:6px;height:48px;background:var(--red)"></div>
+   <div class="abs" style="left:${px(150)-200}px;top:-18px;width:400px;text-align:center;font-size:26px;font-weight:800;color:var(--red)">Respuesta: 150 ms</div>
+   <div class="abs" style="left:${px(180)-3}px;top:20px;width:6px;height:48px;background:var(--grn);transform:scaleY(${pulseT})"></div>
+   <div class="abs" style="left:${px(180)-110}px;top:70px;white-space:nowrap;font-size:26px;font-weight:800;color:var(--grn)">Umbral anti-parpadeo: 180 ms</div>
+   <div class="abs" style="left:${x0+w*ms/300-12}px;top:30px;width:24px;height:24px;border-radius:50%;background:var(--ink)"></div></div>`;
+  const slowO=clamp((lt-S[1].a)*3)*clamp((S[2].a+1-lt)*3);
+  const slow=`<div class="abs" style="left:720px;width:480px;top:34px;text-align:center;font-size:26px;font-weight:800;letter-spacing:.08em;background:var(--ink);color:var(--paper);padding:8px 0;border-radius:4px;opacity:${slowO}">CÁMARA LENTA ×4</div>`;
+  return `<div class="scene" style="opacity:${o}">${labels()}${slow}${appHTML(SK)}${appHTML(FL)}${cursors(lt,click)}${strip}${sub(lt,sc)}</div>`;
+}
+
+function sCold(lt,sc){
+  const o=fade(lt,sc.d,.5,.5), S=sc.segs;
+  const arrive=S[2].a+2.8, waiting=lt<arrive;
+  const pulse=.55+.45*Math.sin(lt*8);
+  const SK=waiting?{x:XL,cls:'r',filter:'Este mes',ds:'A',mode:'skel',nSkel:5,kpi:money(0),footer:'0 registros',pulse}
+                  :{x:XL,cls:'r',filter:'Este mes',ds:'A',mode:'real',kpi:money(DATA.A.total),footer:'Mostrando 4 de 4'};
+  const FL=waiting?{x:XR,cls:'g',filter:'Este mes',ds:'A',mode:'shell',nShell:4,kpi:null,footer:'—'}
+                  :{x:XR,cls:'g',filter:'Este mes',ds:'A',mode:'real',kpi:money(DATA.A.total),footer:'Mostrando 4 de 4',minRows:4};
+  const a=clamp((lt-S[1].a-.8)*2)*clamp((arrive-.3-lt)*2);
+  const calls=`<div class="call r" style="left:${XL+300}px;top:292px;opacity:${a}">$0.00 ← cifra falsa</div>
+   <div class="call r" style="left:${XL+380}px;top:${footY(5)+24}px;opacity:${a}">“0 registros” ← alarma falsa</div>
+   <div class="call g" style="left:${XR+300}px;top:292px;opacity:${a}">— = aún no se sabe</div>
+   <div class="call g" style="left:${XR+360}px;top:${footY(4)+24}px;opacity:${a}">estructura real, sin mentir</div>`;
+  return `<div class="scene" style="opacity:${o}">${labels()}${appHTML(SK)}${appHTML(FL)}${calls}${sub(lt,sc)}</div>`;
+}
+
+function miniTable(x,y,cols,kind,label,hl){
+  const heads=['N.º','Cliente','Fecha','Total','IVA'].slice(0,cols);
+  const row=(i)=>`<div class="mt">`+heads.map((h,j)=>{
+    const isNew=cols>4&&j===4; let inner;
+    if(kind==='real') inner=i===0?`<span class="mh">${h.toUpperCase()}</span>`:['F-104'+i,'Acme','12 mar','$4,820','16%'][j];
+    else if(kind==='skel') inner=i===0?'':`<div class="gb" style="width:${60+((i+j)%3)*18}px;height:16px"></div>`;
+    else inner=i===0?`<span class="mh">${h.toUpperCase()}</span>`:`<span class="dash">—</span>`;
+    return `<div class="mc" style="${isNew&&hl?'background:var(--amb);border-radius:4px':''}">${inner}</div>`;
+  }).join('')+`</div>`;
+  return `<div class="abs" style="left:${x}px;top:${y}px;width:800px"><div style="font-size:24px;color:var(--mut);font-weight:700;margin-bottom:8px">${label}</div>${row(0)}${row(1)}${row(2)}</div>`;
+}
+function sMaint(lt,sc){
+  const o=fade(lt,sc.d,.5,.5), S=sc.segs;
+  const addCol=S[1].a+.9, shellCol=S[2].a+.5;
+  const realCols=lt>=addCol?5:4, shCols=lt>=shellCol?5:4;
+  const hl=lt>=addCol&&lt<addCol+1.6, hl2=lt>=shellCol&&lt<shellCol+1.6;
+  const stale=lt>=addCol+1.4;
+  const fL=(x,y,t,s,bad)=>`<div class="file" style="left:${x}px;top:${y}px;${bad?'border-color:var(--red);border-width:4px':''}">${t}<small>${s}</small></div>`;
+  const left=`${fL(XL+20,200,'Facturas.vue','pantalla real')}${fL(XL+430,200,'FacturasSkeleton.vue','maqueta gris · otro archivo',stale)}
+   ${stale?`<div class="call r" style="left:${XL+250}px;top:152px;opacity:${clamp((lt-addCol-1.4)*3)}">¿alguien actualizó la maqueta?</div>`:''}
+   ${miniTable(XL+20,340,4,'skel','Maqueta (skeleton)')}${miniTable(XL+20,585,realCols,'real','Pantalla real',hl)}
+   ${stale?`<div class="call r" style="left:${XL+20}px;top:835px;opacity:${clamp((lt-addCol-1.4)*3)}">Desfase: la maqueta ya no se parece a la pantalla</div>`:''}`;
+  const right=`${fL(XR+20,200,'Facturas.vue','la pantalla es su propia maqueta')}
+   ${miniTable(XR+20,340,shCols,'shell','Carcasa (cols) → “—” reales',hl2)}${miniTable(XR+20,585,realCols,'real','Pantalla real',hl)}
+   ${lt>=shellCol+.6?`<div class="call g" style="left:${XR+20}px;top:835px;opacity:${clamp((lt-shellCol-.6)*3)}">Una prop (cols). Nada más que mantener.</div>`:''}`;
+  return `<div class="scene" style="opacity:${o}">${labels()}
+   <div class="app r" style="left:${XL}px;top:170px;height:710px"></div><div class="app g" style="left:${XR}px;top:170px;height:710px"></div>
+   ${left}${right}${sub(lt,sc)}</div>`;
+}
+
+function sMeasured(lt,sc){
+  const o=fade(lt,sc.d,.5,.5), S=sc.segs;
+  const x0=330, W=1320, X=(v)=>x0+W*v/0.1;
+  const rows=[
+    {g:'Recargas',y:250,note:'filtrar, paginar, refrescar',bars:[['Skeleton',0.006,'var(--red)'],['Flickerless',0.000,'var(--grn)']],t:S[1].a},
+    {g:'Primera carga',y:500,note:'sin datos previos',bars:[['Skeleton',0.006,'var(--red)'],['Flickerless',0.0145,'var(--grn)']],t:S[2].a}];
+  let h='';
+  rows.forEach(r=>{
+    const a=ease((lt-r.t+.2)/.5);
+    h+=`<div class="abs" style="left:90px;top:${r.y}px;width:230px;opacity:${a}"><div style="font-size:34px;font-weight:800">${r.g}</div><div style="font-size:21px;color:var(--mut);margin-top:4px">${r.note}</div></div>`;
+    r.bars.forEach((b,i)=>{
+      const g=ease((lt-r.t-.3-i*.4)/.9), val=b[1]*g, bw=Math.max(5,X(val)-x0);
+      const yy=r.y+i*78;
+      h+=`<div class="abs" style="left:${x0}px;top:${yy}px;height:58px;width:${bw}px;background:${b[2]};opacity:${a}"></div>
+       <div class="abs mono" style="left:${x0+bw+16}px;top:${yy+8}px;font-size:34px;font-weight:700;opacity:${a*g};color:${b[2]}">${b[1].toFixed(3)}</div>
+       <div class="abs" style="left:${x0+bw+170}px;top:${yy+17}px;font-size:24px;font-weight:700;color:var(--mut);opacity:${a*g}">${b[0]}</div>`;
+    });
+  });
+  const ta=ease((lt-S[3].a+.2)/.6);
+  const note=lt>=S[2].a+2?`<div class="abs" style="left:${x0}px;top:672px;font-size:24px;color:var(--mut);opacity:${ease((lt-S[2].a-2)/.5)}">En frío, las columnas se reacomodan cuando llega el contenido real.</div>`:'';
+  return `<div class="scene" style="opacity:${o}">
+   <div class="abs" style="left:90px;top:80px;font-size:68px;font-weight:900;letter-spacing:-.03em">CLS medido <span style="color:var(--mut);font-weight:600">· menos es mejor</span></div>
+   <div class="abs mono" style="left:90px;top:168px;font-size:22px;color:var(--mut)">Playwright + Chromium · playground del repo · latencia 800 ms · media de 3 corridas</div>
+   <div class="abs" style="left:${x0}px;top:230px;width:2px;height:470px;background:var(--ink)"></div>
+   <div class="abs mono" style="left:${x0-10}px;top:706px;font-size:22px;color:var(--mut)">0</div>
+   <div class="abs" style="left:${X(.1)}px;top:230px;width:0;height:470px;border-left:3px dashed var(--grn);opacity:${ta}"></div>
+   <div class="abs" style="left:${X(.1)-250}px;top:706px;width:260px;text-align:right;font-size:24px;font-weight:800;color:var(--grn);opacity:${ta}">0.1 · umbral «bueno»</div>
+   ${h}${note}${sub(lt,sc)}</div>`;
+}
+
+const ROWS=[
+ ['Parpadeo','Flash gris en cada respuesta rápida','Umbral de 180 ms: nada si llega antes'],
+ ['Recargas','Pierdes lo que estabas mirando','Lo anterior se queda, atenuado'],
+ ['Datos falsos','$0.00 y “0 registros” mientras carga','“—” hasta tener un dato real'],
+ ['Mantenimiento','Una maqueta por pantalla','El contenido real es su maqueta'],
+ ['CLS en recargas (medido)','0.006','0.000']
+];
+function sScore(lt,sc){
+  const o=fade(lt,sc.d,.5,.6);
+  let rows='';
+  ROWS.forEach((r,i)=>{
+    const t0=1.0+i*1.1, a=ease((lt-t0)/.45), b=ease((lt-t0-.4)/.45);
+    rows+=`<div class="sr" style="opacity:${a};transform:translateX(${(1-a)*26}px)"><div class="lb">${r[0]}</div>
+     <div class="a"><div class="ic x" style="transform:scale(${a})"></div>${r[1]}</div>
+     <div class="b" style="opacity:${b}"><div class="ic k" style="transform:scale(${b})"></div>${r[2]}</div></div>`;
+  });
+  return `<div class="scene" style="opacity:${o}">
+   <div class="abs" style="left:150px;top:80px;display:flex;font-size:34px;font-weight:900;letter-spacing:.05em"><div style="width:430px"></div><div style="width:590px;color:var(--red)">SKELETON</div><div style="width:590px;color:var(--grn)">FLICKERLESS</div></div>
+   <div class="abs" style="left:150px;right:150px;top:160px">${rows}</div>${sub(lt,sc)}</div>`;
+}
+
+function sOutro(lt,sc){
+  const o=fade(lt,sc.d,.6,.9), S=sc.segs;
+  const cards=[['FlickerlessSurface','Envuelve la zona de datos. Atenúa lo que ya había + barra de 2 px.'],['FlickerlessValue','Un dato que aún no existe se ve como “—”, nunca como cero.'],['FlickerlessTableShell','La carga en frío: filas reales con “—”, no cajas grises.']];
+  const cs=cards.map((c,i)=>{const a=ease((lt-.9-i*.5)/.6);return `<div class="abs" style="left:${130+i*580}px;top:420px;width:540px;height:230px;border:2px solid var(--ink);border-radius:10px;background:var(--card);padding:30px;box-shadow:10px 10px 0 var(--grn);opacity:${a};transform:translateY(${(1-a)*26}px)"><div class="mono" style="font-size:28px;font-weight:700;color:var(--grn);margin-bottom:14px">${c[0]}</div><div style="font-size:27px;line-height:1.35">${c[1]}</div></div>`}).join('');
+  const t=ease((lt-.1)/.7), z=ease((lt-S[1].a)/.6);
+  return `<div class="scene" style="opacity:${o}">
+   <div class="abs" style="left:0;right:0;top:130px;text-align:center;opacity:${t}"><div style="font-size:130px;font-weight:900;letter-spacing:-.045em;color:var(--grn)">Flickerless</div>
+   <div style="font-size:42px;font-weight:600;margin-top:12px">Lo que ya estaba <span style="background:var(--amb);padding:0 10px;border-radius:4px">se queda</span>. Lo que aún no existe es <span style="background:var(--amb);padding:0 10px;border-radius:4px">“—”</span>.</div></div>
+   ${cs}
+   <div class="abs" style="left:0;right:0;top:730px;text-align:center;opacity:${z}">
+    <div style="display:inline-flex;gap:18px">${['Vue 3','React','React Native'].map(x=>`<span class="tag g" style="font-size:32px;padding:8px 28px">${x}</span>`).join('')}</div>
+    <div style="font-size:28px;color:var(--mut);margin-top:30px">Pensado para tablas, gráficos y paneles de negocio · CRM · ERP · finanzas</div>
+    <div class="mono" style="font-size:30px;margin-top:16px;font-weight:700">github.com/LuisMTaveras/flickerless</div></div></div>`;
+}
+
+const FN={title:sTitle,reload:sReload,fast:sFast,cold:sCold,maint:sMaint,measured:sMeasured,score:sScore,outro:sOutro};
+window.TOTAL=TM.total;
+window.render=function(t){
+  t=clamp(t,0,TM.total-1e-6); let h='';
+  for(const s of TM.scenes){ if(t>=s.t0&&t<s.t0+s.d){ h=FN[s.id](t-s.t0,s); break; } }
+  $('root').innerHTML=h;
+};
+render(0);
+</script></body></html>
